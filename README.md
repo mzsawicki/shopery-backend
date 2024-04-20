@@ -1,0 +1,3 @@
+# Shopery
+
+Demo project WIP
