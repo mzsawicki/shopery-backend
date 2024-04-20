@@ -6,9 +6,27 @@ from src.common.model import Entity
 
 
 def construct_connection_string(
-    user: str, password: str, host: str, port: int, database_name: str
+    user: str,
+    password: str,
+    host: str,
+    port: int,
+    database_name: str,
+    async_: bool = True,
 ) -> str:
-    return f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{database_name}"
+    driver = "postgresql+asyncpg" if async_ else "postgresql"
+    return f"{driver}://{user}:{password}@{host}:{port}/{database_name}"
+
+
+def connection_string_from_config(config: Config, async_: bool = True) -> str:
+    dsn = construct_connection_string(
+        config.postgres_user,
+        config.postgres_password,
+        config.postgres_host,
+        config.postgres_port,
+        config.postgres_database_name,
+        async_=async_,
+    )
+    return dsn
 
 
 def create_database_engine(connection_string: str) -> AsyncEngine:
@@ -33,16 +51,10 @@ async def dispose_engine(engine: AsyncEngine) -> None:
     await engine.dispose()
 
 
-class Database:
+class SQLDatabase:
     def __init__(self):
         config = Config()
-        dsn = construct_connection_string(
-            config.postgres_user,
-            config.postgres_password,
-            config.postgres_host,
-            config.postgres_port,
-            config.postgres_database_name,
-        )
+        dsn = connection_string_from_config(config)
         engine = create_database_engine(dsn)
         self._session_factory = get_session_factory(engine)
 

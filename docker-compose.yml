@@ -1,0 +1,15 @@
+version: "3"
+services:
+  db:
+    image: postgres
+    volumes:
+      - db_data:/var/lib/postgres
+    env_file:
+      - config.dev.env
+    ports:
+      - "5432:5432"
+volumes:
+  db_data:
+    driver: local
+  cache:
+    driver: local
