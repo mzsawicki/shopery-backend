@@ -5,8 +5,8 @@ from dataclasses import dataclass
 
 from fastapi import Depends
 from sqlalchemy import func, select
-from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from sqlalchemy.orm import joinedload
 
 from src.common.sql import SQLDatabase
 from src.common.time import LocalTimeProvider, TimeProvider
@@ -108,7 +108,7 @@ class ProductService:
             .options(
                 joinedload(Product.category),
                 joinedload(Product.brand),
-                joinedload(Product.tags)
+                joinedload(Product.tags),
             )
         )
         async with self._session_factory() as session:
