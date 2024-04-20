@@ -11,8 +11,8 @@ from sqlalchemy.orm import joinedload
 from src.common.sql import SQLDatabase
 from src.common.time import LocalTimeProvider, TimeProvider
 from src.products.dto import (BrandItem, BrandList, CategoryItem, CategoryList,
-                              NewBrand, NewCategory, NewProduct, NewTag,
-                              ProductDetail, ProductList, ProductListItem,
+                              NewBrand, NewCategory, NewTag, ProductDetail,
+                              ProductList, ProductListItem, ProductWrite,
                               TagItem, TagsList)
 from src.products.model import Brand, Category, Product, Tag, products_tags
 
@@ -32,7 +32,7 @@ class ProductService:
         self._session_factory = session_factory
         self._time_provider = time_provider
 
-    async def add_product(self, dto: NewProduct) -> Result:
+    async def add_product(self, dto: ProductWrite) -> Result:
         created_at = self._time_provider.now()
         async with self._session_factory() as session:
             does_product_exist = await _does_product_already_exist(
@@ -67,6 +67,51 @@ class ProductService:
                 tags=tags,
                 created_at=created_at,
             )
+            session.add(product)
+            await session.commit()
+        return Result(success=True)
+
+    async def update_product(self, guid: uuid.UUID, dto: ProductWrite) -> Result:
+        updated_at = self._time_provider.now()
+        stmt = (
+            select(Product)
+            .where(Product.guid == guid)
+            .where(Product.removed_at.is_(None))
+            .options(
+                joinedload(Product.category),
+                joinedload(Product.brand),
+                joinedload(Product.tags),
+            )
+        )
+        async with self._session_factory() as session:
+            result = await session.execute(stmt)
+            product = result.unique().scalar_one_or_none()
+            if not product:
+                return Result(success=False, info=f"Product {guid} not found")
+            tags = await _get_tags_by_guids(dto.tags_guids, session)
+            if len(tags) < len(dto.tags_guids):
+                return Result(success=False, info="Not all requested tags were found")
+            category = await _get_category_or_none_by_guid(dto.category_guid, session)
+            if not category:
+                return Result(
+                    success=False, info=f"Category {dto.category_guid} not found"
+                )
+            brand = await _get_brand_or_none_by_guid(dto.brand_guid, session)
+            if not brand:
+                return Result(success=False, info=f"Brand {dto.brand_guid} not found")
+            product.sku = dto.sku
+            product.name = dto.name
+            product.image_url = dto.image_url
+            product.description = dto.description
+            product.base_price = dto.base_price
+            product.discount = dto.discount
+            product.quantity = dto.quantity
+            product.weight = dto.weight
+            product.color = dto.color
+            product.tags = tags
+            product.category = category
+            product.brand = brand
+            product.updated_at = updated_at
             session.add(product)
             await session.commit()
         return Result(success=True)

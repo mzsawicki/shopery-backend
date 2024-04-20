@@ -5,7 +5,7 @@ from decimal import Decimal
 from pydantic import BaseModel, ConfigDict, Field, PositiveInt
 
 
-class NewProduct(BaseModel):
+class ProductWrite(BaseModel):
     sku: str = Field(min_length=3, max_length=16, examples=["2,51,594"])
     name: str = Field(min_length=3, max_length=64, examples=["Chinese Cabbage"])
     image_url: typing.Optional[str] = Field(
