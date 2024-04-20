@@ -1,14 +1,14 @@
 import datetime
-from decimal import Decimal
 import typing
 import uuid
+from decimal import Decimal
 
-from sqlalchemy import DateTime, String, Integer, Table, Column, ForeignKey, Text
+from sqlalchemy import (Column, DateTime, ForeignKey, Integer, String, Table,
+                        Text)
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.common.model import Entity, AMOUNT_NUMERIC_PRECISION
-
+from src.common.model import AMOUNT_NUMERIC_PRECISION, Entity
 
 SCHEMA = "products"
 
@@ -26,7 +26,7 @@ class Brand(Entity):
     __tablename__ = "brands"
     __table_args__ = {"schema": SCHEMA}
 
-    def __init__(self, name: str, logo_url: str, created_at: datetime):
+    def __init__(self, name: str, logo_url: str, created_at: datetime.datetime):
         self.name: str = name
         self.logo_url: str = logo_url
         self.created_at: datetime.datetime = created_at
@@ -73,7 +73,7 @@ products_tags = Table(
     Entity.metadata,
     Column("tag_guid", ForeignKey("tags.guid")),
     Column("product_guid", ForeignKey("products.guid")),
-    schema=SCHEMA
+    schema=SCHEMA,
 )
 
 
@@ -88,7 +88,9 @@ class Product(Entity):
         postgresql.NUMERIC(AMOUNT_NUMERIC_PRECISION), nullable=False
     )
     discount: Mapped[Integer] = mapped_column(Integer, nullable=True)
-    quantity: Mapped[int] = mapped_column(Integer, nullable=False)
+    quantity: Mapped[Decimal] = mapped_column(
+        postgresql.NUMERIC(AMOUNT_NUMERIC_PRECISION), nullable=False
+    )
     weight: Mapped[int] = mapped_column(Integer, nullable=False)
     color: Mapped[str] = mapped_column(String(32), nullable=False)
     tags: Mapped[typing.List[Tag]] = relationship(secondary=products_tags)
@@ -104,9 +106,16 @@ class Product(Entity):
     __table_args__ = {"schema": SCHEMA}
 
     def __init__(
-        self, sku: str, name: str, description: str,
-        base_price: Decimal, quantity: Decimal, category: Category,
-        brand: Brand, tags: typing.List[Tag], created_at: datetime.datetime
+        self,
+        sku: str,
+        name: str,
+        description: str,
+        base_price: Decimal,
+        quantity: Decimal,
+        category: Category,
+        brand: Brand,
+        tags: typing.List[Tag],
+        created_at: datetime.datetime,
     ):
         self.guid: uuid.UUID = uuid.uuid4()
         self.sku: str = sku
