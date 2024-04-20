@@ -5,9 +5,19 @@ services:
     volumes:
       - db_data:/var/lib/postgres
     env_file:
-      - config.dev.env
+      - config.env
     ports:
       - "5432:5432"
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - config.env
+    volumes:
+      - ./:/application
 volumes:
   db_data:
     driver: local

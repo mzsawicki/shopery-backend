@@ -161,4 +161,4 @@ cython_debug/
 
 .DS_Store
 
-config.dev.env
+config.env
