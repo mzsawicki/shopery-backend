@@ -17,7 +17,7 @@ class Brand(Entity):
     guid: Mapped[uuid.UUID] = mapped_column(
         postgresql.UUID(as_uuid=True), primary_key=True
     )
-    name: Mapped[str] = mapped_column(String(32), nullable=False)
+    name: Mapped[str] = mapped_column(String(64), nullable=False)
     logo_url: Mapped[str] = mapped_column(String(256), nullable=True)
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
     updated_at: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
@@ -37,7 +37,7 @@ class Category(Entity):
     guid: Mapped[uuid.UUID] = mapped_column(
         postgresql.UUID(as_uuid=True), primary_key=True
     )
-    name: Mapped[str] = mapped_column(String(32), nullable=False)
+    name: Mapped[str] = mapped_column(String(64), nullable=False)
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
     updated_at: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
     removed_at: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=True)
