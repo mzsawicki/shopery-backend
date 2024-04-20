@@ -3,9 +3,9 @@ import uuid
 from fastapi import APIRouter, Depends, Response, status
 from fastapi.responses import JSONResponse
 
-from src.products.dto import (BrandList, CategoryList, NewBrand, NewCategory,
-                              NewTag, ProductDetail, ProductList, ProductWrite,
-                              TagsList)
+from src.products.dto import (BrandList, BrandWrite, CategoryList,
+                              CategoryWrite, NewTag, ProductDetail,
+                              ProductList, ProductWrite, TagsList)
 from src.products.service import ProductService
 
 router = APIRouter(tags=["product management"])
@@ -91,10 +91,27 @@ async def get_categories(
 @router.post(
     "/categories", status_code=status.HTTP_201_CREATED, name="Create a new category"
 )
-async def post_category(dto: NewCategory, service: ProductService = Depends()):
+async def post_category(dto: CategoryWrite, service: ProductService = Depends()):
     result = await service.create_category(dto)
     if result.success:
         return Response(status_code=status.HTTP_201_CREATED)
+    else:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST, content={"detail": result.info}
+        )
+
+
+@router.put(
+    "/categories/{guid}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    name="Update a category",
+)
+async def put_category(
+    guid: uuid.UUID, dto: CategoryWrite, service: ProductService = Depends()
+):
+    result = await service.update_category(guid, dto)
+    if result.success:
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
     else:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST, content={"detail": result.info}
@@ -129,10 +146,25 @@ async def get_brands(
 
 
 @router.post("/brands", status_code=status.HTTP_201_CREATED, name="Create a new brand")
-async def post_brand(dto: NewBrand, service: ProductService = Depends()):
+async def post_brand(dto: BrandWrite, service: ProductService = Depends()):
     result = await service.add_brand(dto)
     if result.success:
         return Response(status_code=status.HTTP_201_CREATED)
+    else:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST, content={"detail": result.info}
+        )
+
+
+@router.put(
+    "/brands/{guid}", status_code=status.HTTP_204_NO_CONTENT, name="Update a brand"
+)
+async def put_brand(
+    guid: uuid.UUID, dto: BrandWrite, service: ProductService = Depends()
+):
+    result = await service.update_brand(guid, dto)
+    if result.success:
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
     else:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST, content={"detail": result.info}

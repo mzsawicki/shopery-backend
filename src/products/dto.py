@@ -113,7 +113,7 @@ class TagsList(BaseModel):
     items: typing.List[TagItem]
 
 
-class NewCategory(BaseModel):
+class CategoryWrite(BaseModel):
     name: str = Field(min_length=3, max_length=64, examples=["Vegetables"])
 
 
@@ -124,7 +124,7 @@ class CategoryList(BaseModel):
     items: typing.List[CategoryItem]
 
 
-class NewBrand(BaseModel):
+class BrandWrite(BaseModel):
     name: str = Field(min_length=3, max_length=64, examples=["Farmary"])
     logo_url: typing.Optional[str] = Field(
         min_length=16,

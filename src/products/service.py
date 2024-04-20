@@ -10,10 +10,10 @@ from sqlalchemy.orm import joinedload
 
 from src.common.sql import SQLDatabase
 from src.common.time import LocalTimeProvider, TimeProvider
-from src.products.dto import (BrandItem, BrandList, CategoryItem, CategoryList,
-                              NewBrand, NewCategory, NewTag, ProductDetail,
-                              ProductList, ProductListItem, ProductWrite,
-                              TagItem, TagsList)
+from src.products.dto import (BrandItem, BrandList, BrandWrite, CategoryItem,
+                              CategoryList, CategoryWrite, NewTag,
+                              ProductDetail, ProductList, ProductListItem,
+                              ProductWrite, TagItem, TagsList)
 from src.products.model import Brand, Category, Product, Tag, products_tags
 
 
@@ -181,7 +181,7 @@ class ProductService:
             await session.commit()
         return Result(success=True)
 
-    async def create_category(self, dto: NewCategory) -> Result:
+    async def create_category(self, dto: CategoryWrite) -> Result:
         created_at = self._time_provider.now()
         category = Category(dto.name, created_at)
         async with self._session_factory() as session:
@@ -190,6 +190,24 @@ class ProductService:
             )
             if category_already_exists:
                 return Result(success=False, info=f"Category {dto.name} already exists")
+            session.add(category)
+            await session.commit()
+        return Result(success=True)
+
+    async def update_category(self, guid: uuid.UUID, dto: CategoryWrite) -> Result:
+        updated_at = self._time_provider.now()
+        stmt = (
+            select(Category)
+            .where(Category.guid == guid)
+            .where(Category.removed_at.is_(None))
+        )
+        async with self._session_factory() as session:
+            result = await session.execute(stmt)
+            category = result.unique().scalar_one_or_none()
+            if not category:
+                return Result(success=False, info=f"Category {guid} not found")
+            category.name = dto.name
+            category.updated_at = updated_at
             session.add(category)
             await session.commit()
         return Result(success=True)
@@ -274,13 +292,28 @@ class ProductService:
             items=[BrandItem.model_validate(brand) for brand in brands],
         )
 
-    async def add_brand(self, dto: NewBrand) -> Result:
+    async def add_brand(self, dto: BrandWrite) -> Result:
         created_at = self._time_provider.now()
         brand = Brand(dto.name, dto.logo_url, created_at)
         async with self._session_factory() as session:
             already_exists = await _does_brand_already_exist(dto.name, session)
             if already_exists:
                 return Result(success=False, info=f"Brand {dto.name} already exists")
+            session.add(brand)
+            await session.commit()
+        return Result(success=True)
+
+    async def update_brand(self, guid: uuid.UUID, dto: BrandWrite) -> Result:
+        updated_at = self._time_provider.now()
+        stmt = select(Brand).where(Brand.guid == guid).where(Brand.removed_at.is_(None))
+        async with self._session_factory() as session:
+            result = await session.execute(stmt)
+            brand = result.unique().scalar_one_or_none()
+            if not brand:
+                return Result(success=False, info=f"Brand {guid} not found")
+            brand.name = dto.name
+            brand.logo_url = dto.logo_url
+            brand.updated_at = updated_at
             session.add(brand)
             await session.commit()
         return Result(success=True)
