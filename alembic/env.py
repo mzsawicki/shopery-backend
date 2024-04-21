@@ -5,7 +5,7 @@ from sqlalchemy import engine_from_config, pool
 from alembic import context
 from src.common.config import Config as ApplicationConfig
 from src.common.model import Entity
-from src.common.sql import connection_string_from_config
+from src.common.sql import connection_string_from_config, construct_connection_string
 from src.products.model import Brand, Category, Product, Tag
 
 # this is the Alembic Config object, which provides
@@ -61,10 +61,11 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
+    app_config = ApplicationConfig()
     sqlalchemy_config = config.get_section(config.config_ini_section)
     assert sqlalchemy_config
     sqlalchemy_config["sqlalchemy.url"] = connection_string_from_config(
-        ApplicationConfig(), async_=False
+        app_config, async_=False
     )
     connectable = engine_from_config(
         sqlalchemy_config,

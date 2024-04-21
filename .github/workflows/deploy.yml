@@ -24,6 +24,14 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
           script: "cd shopery-backend && make lint"
+    - name: Test
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        port: ${{ secrets.PORT }}
+        script: "cd shopery-backend && make test"
     - name: Migrate
       uses: appleboy/ssh-action@v1.0.3
       with:
