@@ -14,9 +14,10 @@ RUN pip install  --no-cache-dir --upgrade setuptools poetry pyopenssl
 
 WORKDIR /application
 RUN cd /application
-COPY poetry.lock pyproject.toml ./
-COPY . .
-COPY config.env config.dev.env
+COPY poetry.lock pyproject.toml alembic.ini mypy.init ./
+COPY alembic ./
+COPY SRC ./
+COPY config.env config.env
 
 RUN poetry config virtualenvs.create false
 RUN poetry install
