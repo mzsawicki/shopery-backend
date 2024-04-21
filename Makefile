@@ -10,7 +10,5 @@ down:
 	docker-compose down
 log:
 	docker-compose logs
-tests:
-	docker-compose -f docker-compose.test.yml up --build -d --remove-orphans
-	docker-compose -f docker-compose.test.yml up db-test -d
+test:
 	docker-compose -f docker-compose.test.yml run tests poetry run pytest
