@@ -19,8 +19,4 @@ COPY poetry.lock pyproject.toml alembic.ini mypy.init pytest.ini ./
 RUN poetry config virtualenvs.create false
 RUN poetry install
 
-COPY alembic ./
-COPY src .
-COPY tests ./
-COPY config.env ./
-COPY config.test.env ./
+COPY . .
