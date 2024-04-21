@@ -1,0 +1,43 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build
+      uses: sebastianjnuwu/ssh-action-deploy@v3
+      with:
+          IP: ${{ secrets.IP }}
+          USER: ${{ secrets.USER }}
+          KEY: ${{ secrets.KEY }}
+          FOLDER: ${{ secrets.DIR }}
+          RUN: "make down; make build"
+    - name: Lint
+      uses: sebastianjnuwu/ssh-action-deploy@v3
+      with:
+          IP: ${{ secrets.IP }}
+          USER: ${{ secrets.USER }}
+          KEY: ${{ secrets.KEY }}
+          FOLDER: ${{ secrets.DIR }}
+          RUN: "make lint"
+    - name: Migrate
+      uses: sebastianjnuwu/ssh-action-deploy@v3
+      with:
+          IP: ${{ secrets.IP }}
+          USER: ${{ secrets.USER }}
+          KEY: ${{ secrets.KEY }}
+          FOLDER: ${{ secrets.DIR }}
+          RUN: "make migrate"
+    - name: Deploy
+      uses: sebastianjnuwu/ssh-action-deploy@v3
+      with:
+          IP: ${{ secrets.IP }}
+          USER: ${{ secrets.USER }}
+          KEY: ${{ secrets.KEY }}
+          FOLDER: ${{ secrets.DIR }}
+          RUN: "make up"
+    
