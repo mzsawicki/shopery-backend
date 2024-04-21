@@ -31,7 +31,7 @@ jobs:
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
-        script: "cd shopery-backend && docker-compose -f docker-compose.test.yml run tests poetry run pytest"
+        script: "cd shopery-backend && make test"
     - name: Migrate
       uses: appleboy/ssh-action@v1.0.3
       with:
