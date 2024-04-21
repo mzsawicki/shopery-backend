@@ -15,7 +15,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
-          script: "make down; make build"
+          script: "cd shopery-backend && make down && make build"
     - name: Lint
       uses: appleboy/ssh-action@v1.0.3
       with:
@@ -23,7 +23,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
-          script: "make lint"
+          script: "cd shopery-backend && make lint"
     - name: Migrate
       uses: appleboy/ssh-action@v1.0.3
       with:
@@ -31,7 +31,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
-          script: "make migrate"
+          script: "cd shopery-backend && make migrate"
     - name: Deploy
       uses: appleboy/ssh-action@v1.0.3
       with:
@@ -39,5 +39,5 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
-          script: "make up"
+          script: "cd shopery-backend && make up"
     
