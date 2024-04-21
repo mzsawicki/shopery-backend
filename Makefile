@@ -7,7 +7,7 @@ build:
 up:
 	docker-compose up -d
 down:
-	docker-compose down
+	docker-compose down --remove-orphans
 log:
 	docker-compose logs
 test:
