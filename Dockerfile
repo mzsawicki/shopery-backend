@@ -20,5 +20,3 @@ COPY config.env config.dev.env
 
 RUN poetry config virtualenvs.create false
 RUN poetry install
-
-CMD ["uvicorn", "src.api:app", "--host", "0.0.0.0", "--port", "8000"]
