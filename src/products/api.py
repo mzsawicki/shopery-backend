@@ -34,12 +34,15 @@ async def get_product_detail(guid: uuid.UUID, service: ProductService = Depends(
 
 
 @router.post(
-    "/products", status_code=status.HTTP_201_CREATED, name="Create new product"
+    "/products",
+    status_code=status.HTTP_201_CREATED,
+    response_model=ProductDetail,
+    name="Create new product"
 )
 async def post_product(dto: ProductWrite, service: ProductService = Depends()):
     result = await service.add_product(dto)
     if result.success:
-        return Response(status_code=status.HTTP_201_CREATED)
+        return result.product
     else:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST, content={"detail": result.info}

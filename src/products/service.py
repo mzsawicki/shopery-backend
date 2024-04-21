@@ -23,6 +23,13 @@ class Result:
     info: typing.Optional[str] = None
 
 
+@dataclass(init=True, frozen=True)
+class AddProductResult:
+    success: bool
+    product: typing.Optional[ProductDetail] = None
+    info: typing.Optional[str] = None
+
+
 class ProductService:
     def __init__(
         self,
@@ -32,27 +39,27 @@ class ProductService:
         self._session_factory = session_factory
         self._time_provider = time_provider
 
-    async def add_product(self, dto: ProductWrite) -> Result:
+    async def add_product(self, dto: ProductWrite) -> AddProductResult:
         created_at = self._time_provider.now()
-        async with self._session_factory() as session:
+        async with self._session_factory(expire_on_commit=False) as session:
             does_product_exist = await _does_product_already_exist(
                 dto.sku, dto.name, session
             )
             if does_product_exist:
-                return Result(
+                return AddProductResult(
                     success=False, info="Product of such sku or name already exists"
                 )
             tags = await _get_tags_by_guids(dto.tags_guids, session)
             if len(tags) < len(dto.tags_guids):
-                return Result(success=False, info="Not all requested tags were found")
+                return AddProductResult(success=False, info="Not all requested tags were found")
             category = await _get_category_or_none_by_guid(dto.category_guid, session)
             if not category:
-                return Result(
+                return AddProductResult(
                     success=False, info=f"Category {dto.category_guid} not found"
                 )
             brand = await _get_brand_or_none_by_guid(dto.brand_guid, session)
             if not brand:
-                return Result(success=False, info=f"Brand {dto.brand_guid} not found")
+                return AddProductResult(success=False, info=f"Brand {dto.brand_guid} not found")
             product = Product(
                 sku=dto.sku,
                 name=dto.name,
@@ -69,7 +76,7 @@ class ProductService:
             )
             session.add(product)
             await session.commit()
-        return Result(success=True)
+        return AddProductResult(product=ProductDetail.validate(product), success=True)
 
     async def update_product(self, guid: uuid.UUID, dto: ProductWrite) -> Result:
         updated_at = self._time_provider.now()
