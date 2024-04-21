@@ -14,7 +14,7 @@ from src.products.dto import (BrandItem, BrandList, BrandWrite, CategoryItem,
                               CategoryList, CategoryWrite, NewTag,
                               ProductDetail, ProductList, ProductListItem,
                               ProductWrite, TagItem, TagsList)
-from src.products.model import Brand, Category, Product, Tag, products_tags
+from src.products.model import Brand, Category, Product, Tag
 
 
 @dataclass(init=True, frozen=True)
@@ -27,6 +27,27 @@ class Result:
 class ProductWriteResult:
     success: bool
     product: typing.Optional[ProductDetail] = None
+    info: typing.Optional[str] = None
+
+
+@dataclass(init=True, frozen=True)
+class CategoryWriteResult:
+    success: bool
+    category: typing.Optional[CategoryItem] = None
+    info: typing.Optional[str] = None
+
+
+@dataclass(init=True, frozen=True)
+class BrandWriteResult:
+    success: bool
+    brand: typing.Optional[BrandItem] = None
+    info: typing.Optional[str] = None
+
+
+@dataclass(init=True, frozen=True)
+class TagWriteResult:
+    success: bool
+    tag: typing.Optional[TagItem] = None
     info: typing.Optional[str] = None
 
 
@@ -188,36 +209,36 @@ class ProductService:
             await session.commit()
         return Result(success=True)
 
-    async def create_category(self, dto: CategoryWrite) -> Result:
+    async def create_category(self, dto: CategoryWrite) -> CategoryWriteResult:
         created_at = self._time_provider.now()
         category = Category(dto.name, created_at)
-        async with self._session_factory() as session:
+        async with self._session_factory(expire_on_commit=False) as session:
             category_already_exists = await _does_category_already_exist(
                 dto.name, session
             )
             if category_already_exists:
-                return Result(success=False, info=f"Category {dto.name} already exists")
+                return CategoryWriteResult(success=False, info=f"Category {dto.name} already exists")
             session.add(category)
             await session.commit()
-        return Result(success=True)
+        return CategoryWriteResult(success=True, category=CategoryItem.model_validate(category))
 
-    async def update_category(self, guid: uuid.UUID, dto: CategoryWrite) -> Result:
+    async def update_category(self, guid: uuid.UUID, dto: CategoryWrite) -> CategoryWriteResult:
         updated_at = self._time_provider.now()
         stmt = (
             select(Category)
             .where(Category.guid == guid)
             .where(Category.removed_at.is_(None))
         )
-        async with self._session_factory() as session:
+        async with self._session_factory(expire_on_commit=False) as session:
             result = await session.execute(stmt)
             category = result.unique().scalar_one_or_none()
             if not category:
-                return Result(success=False, info=f"Category {guid} not found")
+                return CategoryWriteResult(success=False, info=f"Category {guid} not found")
             category.name = dto.name
             category.updated_at = updated_at
             session.add(category)
             await session.commit()
-        return Result(success=True)
+        return CategoryWriteResult(success=True, category=CategoryItem.model_validate(category))
 
     async def get_category_list(self, page_number: int, page_size: int) -> CategoryList:
         categories_stmt = (
@@ -299,31 +320,31 @@ class ProductService:
             items=[BrandItem.model_validate(brand) for brand in brands],
         )
 
-    async def add_brand(self, dto: BrandWrite) -> Result:
+    async def add_brand(self, dto: BrandWrite) -> BrandWriteResult:
         created_at = self._time_provider.now()
         brand = Brand(dto.name, dto.logo_url, created_at)
-        async with self._session_factory() as session:
+        async with self._session_factory(expire_on_commit=False) as session:
             already_exists = await _does_brand_already_exist(dto.name, session)
             if already_exists:
-                return Result(success=False, info=f"Brand {dto.name} already exists")
+                return BrandWriteResult(success=False, info=f"Brand {dto.name} already exists")
             session.add(brand)
             await session.commit()
-        return Result(success=True)
+        return BrandWriteResult(success=True, brand=BrandItem.model_validate(brand))
 
-    async def update_brand(self, guid: uuid.UUID, dto: BrandWrite) -> Result:
+    async def update_brand(self, guid: uuid.UUID, dto: BrandWrite) -> BrandWriteResult:
         updated_at = self._time_provider.now()
         stmt = select(Brand).where(Brand.guid == guid).where(Brand.removed_at.is_(None))
-        async with self._session_factory() as session:
+        async with self._session_factory(expire_on_commit=False) as session:
             result = await session.execute(stmt)
             brand = result.unique().scalar_one_or_none()
             if not brand:
-                return Result(success=False, info=f"Brand {guid} not found")
+                return BrandWriteResult(success=False, info=f"Brand {guid} not found")
             brand.name = dto.name
             brand.logo_url = dto.logo_url
             brand.updated_at = updated_at
             session.add(brand)
             await session.commit()
-        return Result(success=True)
+        return BrandWriteResult(success=True, brand=BrandItem.model_validate(brand))
 
     async def remove_brand(self, guid: uuid.UUID) -> Result:
         removed_at = self._time_provider.now()
@@ -352,15 +373,15 @@ class ProductService:
             await session.commit()
         return Result(success=True)
 
-    async def add_tag(self, dto: NewTag) -> Result:
+    async def add_tag(self, dto: NewTag) -> TagWriteResult:
         created_at = self._time_provider.now()
-        async with self._session_factory() as session:
+        async with self._session_factory(expire_on_commit=False) as session:
             if await _does_tag_already_exist(dto.tag, session):
-                return Result(success=False, info=f"Tag {dto.tag} already exists")
+                return TagWriteResult(success=False, info=f"Tag {dto.tag} already exists")
             tag = Tag(dto.tag, created_at)
             session.add(tag)
             await session.commit()
-        return Result(success=True)
+        return TagWriteResult(success=True, tag=TagItem.model_validate(tag))
 
     async def get_tags_list(self, page_number: int, page_size: int) -> TagsList:
         tags_stmt = (

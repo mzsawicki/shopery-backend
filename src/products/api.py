@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 
 from src.products.dto import (BrandList, BrandWrite, CategoryList,
                               CategoryWrite, NewTag, ProductDetail,
-                              ProductList, ProductWrite, TagsList)
+                              ProductList, ProductWrite, TagsList, CategoryItem, BrandItem, TagItem)
 from src.products.service import ProductService
 
 router = APIRouter(tags=["product management"])
@@ -51,7 +51,7 @@ async def post_product(dto: ProductWrite, service: ProductService = Depends()):
 
 @router.put(
     "/products/{guid}",
-    status_code=status.HTTP_204_NO_CONTENT,
+    status_code=status.HTTP_200_OK,
     name="Update product details",
 )
 async def put_product(
@@ -92,12 +92,12 @@ async def get_categories(
 
 
 @router.post(
-    "/categories", status_code=status.HTTP_201_CREATED, name="Create a new category"
+    "/categories", status_code=status.HTTP_201_CREATED, response_model=CategoryItem, name="Create a new category"
 )
 async def post_category(dto: CategoryWrite, service: ProductService = Depends()):
     result = await service.create_category(dto)
     if result.success:
-        return Response(status_code=status.HTTP_201_CREATED)
+        return result.category
     else:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST, content={"detail": result.info}
@@ -106,7 +106,8 @@ async def post_category(dto: CategoryWrite, service: ProductService = Depends())
 
 @router.put(
     "/categories/{guid}",
-    status_code=status.HTTP_204_NO_CONTENT,
+    status_code=status.HTTP_200_OK,
+    response_model=CategoryItem,
     name="Update a category",
 )
 async def put_category(
@@ -114,7 +115,7 @@ async def put_category(
 ):
     result = await service.update_category(guid, dto)
     if result.success:
-        return Response(status_code=status.HTTP_204_NO_CONTENT)
+        return result.category
     else:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST, content={"detail": result.info}
@@ -148,11 +149,11 @@ async def get_brands(
     return await service.get_brands_list(page_number, page_size)
 
 
-@router.post("/brands", status_code=status.HTTP_201_CREATED, name="Create a new brand")
+@router.post("/brands", status_code=status.HTTP_201_CREATED, response_model=BrandItem, name="Create a new brand")
 async def post_brand(dto: BrandWrite, service: ProductService = Depends()):
     result = await service.add_brand(dto)
     if result.success:
-        return Response(status_code=status.HTTP_201_CREATED)
+        return result.brand
     else:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST, content={"detail": result.info}
@@ -160,14 +161,14 @@ async def post_brand(dto: BrandWrite, service: ProductService = Depends()):
 
 
 @router.put(
-    "/brands/{guid}", status_code=status.HTTP_204_NO_CONTENT, name="Update a brand"
+    "/brands/{guid}", status_code=status.HTTP_200_OK, response_model=BrandItem, name="Update a brand"
 )
 async def put_brand(
     guid: uuid.UUID, dto: BrandWrite, service: ProductService = Depends()
 ):
     result = await service.update_brand(guid, dto)
     if result.success:
-        return Response(status_code=status.HTTP_204_NO_CONTENT)
+        return result.brand
     else:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST, content={"detail": result.info}
@@ -199,11 +200,11 @@ async def get_tags(
     return await service.get_tags_list(page_number, page_size)
 
 
-@router.post("/tags", status_code=status.HTTP_201_CREATED, name="Create a new tag")
+@router.post("/tags", status_code=status.HTTP_201_CREATED, response_model=TagItem, name="Create a new tag")
 async def post_tag(dto: NewTag, service: ProductService = Depends()):
     result = await service.add_tag(dto)
     if result.success:
-        return Response(status_code=status.HTTP_201_CREATED)
+        return result.tag
     else:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST, content={"detail": result.info}
