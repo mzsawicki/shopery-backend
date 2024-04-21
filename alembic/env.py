@@ -5,7 +5,8 @@ from sqlalchemy import engine_from_config, pool
 from alembic import context
 from src.common.config import Config as ApplicationConfig
 from src.common.model import Entity
-from src.common.sql import connection_string_from_config, construct_connection_string
+from src.common.sql import (connection_string_from_config,
+                            construct_connection_string)
 from src.products.model import Brand, Category, Product, Tag
 
 # this is the Alembic Config object, which provides

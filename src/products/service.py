@@ -101,7 +101,9 @@ class ProductService:
             )
             session.add(product)
             await session.commit()
-        return ProductWriteResult(product=ProductDetail.model_validate(product), success=True)
+        return ProductWriteResult(
+            product=ProductDetail.model_validate(product), success=True
+        )
 
     async def update_product(
         self, guid: uuid.UUID, dto: ProductWrite

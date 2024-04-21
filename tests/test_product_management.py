@@ -1,15 +1,20 @@
+import typing
 from decimal import Decimal
 
-import alembic.config
-from alembic import config, command
 import pytest
-from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncConnection
+from sqlalchemy.ext.asyncio import AsyncConnection, async_sessionmaker
 
+import alembic.config
+from alembic import command, config
 from src.common.config import Config
-from src.common.sql import create_database_engine, dispose_engine, get_session_factory, connection_string_from_config
+from src.common.sql import (connection_string_from_config,
+                            create_database_engine, dispose_engine,
+                            get_session_factory)
 from src.common.time import LocalTimeProvider
+from src.products.dto import (BrandItem, BrandWrite, CategoryItem,
+                              CategoryWrite, NewTag, ProductDetail,
+                              ProductWrite, TagItem)
 from src.products.service import ProductService
-from src.products.dto import ProductWrite, NewTag, CategoryWrite, BrandWrite, TagItem, CategoryItem, BrandItem, ProductDetail
 
 
 def migrate(connection: AsyncConnection, alembic_config: alembic.config.Config) -> None:
@@ -17,13 +22,15 @@ def migrate(connection: AsyncConnection, alembic_config: alembic.config.Config) 
     command.upgrade(alembic_config, "head")
 
 
-def downgrade(connection: AsyncConnection, alembic_config: alembic.config.Config) -> None:
+def downgrade(
+    connection: AsyncConnection, alembic_config: alembic.config.Config
+) -> None:
     alembic_config.attributes["connection"] = connection
     command.downgrade(alembic_config, "base")
 
 
 @pytest.fixture(scope="function")
-async def database() -> async_sessionmaker:
+async def database() -> typing.AsyncGenerator[async_sessionmaker, None]:
     config_ = Config()
     dns = connection_string_from_config(config_)
     engine = create_database_engine(dns)
@@ -49,24 +56,27 @@ async def service(database) -> ProductService:
 
 async def add_tag(tag: str, service: ProductService) -> TagItem:
     result = await service.add_tag(NewTag(tag=tag))
+    assert result.tag
     return result.tag
 
 
 async def add_brand(name: str, logo_url: str, service: ProductService) -> BrandItem:
-    result = await service.add_brand(
-        BrandWrite(name=name, logo_url=logo_url)
-    )
+    result = await service.add_brand(BrandWrite(name=name, logo_url=logo_url))
+    assert result.brand
     return result.brand
 
 
 async def add_category(category: str, service: ProductService) -> CategoryItem:
     result = await service.create_category(CategoryWrite(name=category))
+    assert result.category
     return result.category
 
 
 async def add_sample_product(service: ProductService) -> ProductDetail:
     tag = await add_tag("Vegetables", service)
-    brand = await add_brand("Farmary", "https://s3.eu-central-1.amazonaws.com/bucket/file", service)
+    brand = await add_brand(
+        "Farmary", "https://s3.eu-central-1.amazonaws.com/bucket/file", service
+    )
     category = await add_category("Vegetables", service)
     result = await service.add_product(
         ProductWrite(
@@ -74,7 +84,7 @@ async def add_sample_product(service: ProductService) -> ProductDetail:
             name="Chinese Cabbage",
             image_url="https://s3.eu-central-1.amazonaws.com/bucket/file",
             description="Sed commodo aliquam dui ac porta. Fusce ipsum felis,"
-                        " imperdiet at posuere ac, viverra at mauris (...)",
+            " imperdiet at posuere ac, viverra at mauris (...)",
             base_price=Decimal("48.00"),
             discount=64,
             quantity=5413,
@@ -82,9 +92,10 @@ async def add_sample_product(service: ProductService) -> ProductDetail:
             color="Green",
             tags_guids=[tag.guid],
             category_guid=category.guid,
-            brand_guid=brand.guid
+            brand_guid=brand.guid,
         )
     )
+    assert result.product
     return result.product
 
 
@@ -94,5 +105,4 @@ async def test_product_added(service: ProductService):
     product = await add_sample_product(service)
     # THEN it can be retrieved
     result = await service.get_product_details(product.guid)
-    assert result.guid == product.guid
-
+    assert result and result.guid == product.guid
