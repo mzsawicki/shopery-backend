@@ -3,9 +3,10 @@ import uuid
 from fastapi import APIRouter, Depends, Response, status
 from fastapi.responses import JSONResponse
 
-from src.products.dto import (BrandList, BrandWrite, CategoryList,
-                              CategoryWrite, NewTag, ProductDetail,
-                              ProductList, ProductWrite, TagsList, CategoryItem, BrandItem, TagItem)
+from src.products.dto import (BrandItem, BrandList, BrandWrite, CategoryItem,
+                              CategoryList, CategoryWrite, NewTag,
+                              ProductDetail, ProductList, ProductWrite,
+                              TagItem, TagsList)
 from src.products.service import ProductService
 
 router = APIRouter(tags=["product management"])
@@ -37,7 +38,7 @@ async def get_product_detail(guid: uuid.UUID, service: ProductService = Depends(
     "/products",
     status_code=status.HTTP_201_CREATED,
     response_model=ProductDetail,
-    name="Create new product"
+    name="Create new product",
 )
 async def post_product(dto: ProductWrite, service: ProductService = Depends()):
     result = await service.add_product(dto)
@@ -92,7 +93,10 @@ async def get_categories(
 
 
 @router.post(
-    "/categories", status_code=status.HTTP_201_CREATED, response_model=CategoryItem, name="Create a new category"
+    "/categories",
+    status_code=status.HTTP_201_CREATED,
+    response_model=CategoryItem,
+    name="Create a new category",
 )
 async def post_category(dto: CategoryWrite, service: ProductService = Depends()):
     result = await service.create_category(dto)
@@ -149,7 +153,12 @@ async def get_brands(
     return await service.get_brands_list(page_number, page_size)
 
 
-@router.post("/brands", status_code=status.HTTP_201_CREATED, response_model=BrandItem, name="Create a new brand")
+@router.post(
+    "/brands",
+    status_code=status.HTTP_201_CREATED,
+    response_model=BrandItem,
+    name="Create a new brand",
+)
 async def post_brand(dto: BrandWrite, service: ProductService = Depends()):
     result = await service.add_brand(dto)
     if result.success:
@@ -161,7 +170,10 @@ async def post_brand(dto: BrandWrite, service: ProductService = Depends()):
 
 
 @router.put(
-    "/brands/{guid}", status_code=status.HTTP_200_OK, response_model=BrandItem, name="Update a brand"
+    "/brands/{guid}",
+    status_code=status.HTTP_200_OK,
+    response_model=BrandItem,
+    name="Update a brand",
 )
 async def put_brand(
     guid: uuid.UUID, dto: BrandWrite, service: ProductService = Depends()
@@ -200,7 +212,12 @@ async def get_tags(
     return await service.get_tags_list(page_number, page_size)
 
 
-@router.post("/tags", status_code=status.HTTP_201_CREATED, response_model=TagItem, name="Create a new tag")
+@router.post(
+    "/tags",
+    status_code=status.HTTP_201_CREATED,
+    response_model=TagItem,
+    name="Create a new tag",
+)
 async def post_tag(dto: NewTag, service: ProductService = Depends()):
     result = await service.add_tag(dto)
     if result.success:

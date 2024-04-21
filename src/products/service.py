@@ -72,7 +72,9 @@ class ProductService:
                 )
             tags = await _get_tags_by_guids(dto.tags_guids, session)
             if len(tags) < len(dto.tags_guids):
-                return ProductWriteResult(success=False, info="Not all requested tags were found")
+                return ProductWriteResult(
+                    success=False, info="Not all requested tags were found"
+                )
             category = await _get_category_or_none_by_guid(dto.category_guid, session)
             if not category:
                 return ProductWriteResult(
@@ -80,7 +82,9 @@ class ProductService:
                 )
             brand = await _get_brand_or_none_by_guid(dto.brand_guid, session)
             if not brand:
-                return ProductWriteResult(success=False, info=f"Brand {dto.brand_guid} not found")
+                return ProductWriteResult(
+                    success=False, info=f"Brand {dto.brand_guid} not found"
+                )
             product = Product(
                 sku=dto.sku,
                 name=dto.name,
@@ -99,7 +103,9 @@ class ProductService:
             await session.commit()
         return ProductWriteResult(product=ProductDetail.validate(product), success=True)
 
-    async def update_product(self, guid: uuid.UUID, dto: ProductWrite) -> ProductWriteResult:
+    async def update_product(
+        self, guid: uuid.UUID, dto: ProductWrite
+    ) -> ProductWriteResult:
         updated_at = self._time_provider.now()
         stmt = (
             select(Product)
@@ -115,10 +121,14 @@ class ProductService:
             result = await session.execute(stmt)
             product = result.unique().scalar_one_or_none()
             if not product:
-                return ProductWriteResult(success=False, info=f"Product {guid} not found")
+                return ProductWriteResult(
+                    success=False, info=f"Product {guid} not found"
+                )
             tags = await _get_tags_by_guids(dto.tags_guids, session)
             if len(tags) < len(dto.tags_guids):
-                return ProductWriteResult(success=False, info="Not all requested tags were found")
+                return ProductWriteResult(
+                    success=False, info="Not all requested tags were found"
+                )
             category = await _get_category_or_none_by_guid(dto.category_guid, session)
             if not category:
                 return ProductWriteResult(
@@ -126,7 +136,9 @@ class ProductService:
                 )
             brand = await _get_brand_or_none_by_guid(dto.brand_guid, session)
             if not brand:
-                return ProductWriteResult(success=False, info=f"Brand {dto.brand_guid} not found")
+                return ProductWriteResult(
+                    success=False, info=f"Brand {dto.brand_guid} not found"
+                )
             product.sku = dto.sku
             product.name = dto.name
             product.image_url = dto.image_url
@@ -142,7 +154,9 @@ class ProductService:
             product.updated_at = updated_at
             session.add(product)
             await session.commit()
-        return ProductWriteResult(success=True, product=ProductDetail.model_validate(product))
+        return ProductWriteResult(
+            success=True, product=ProductDetail.model_validate(product)
+        )
 
     async def get_product_list(self, page_number: int, page_size: int) -> ProductList:
         products_stmt = (
@@ -217,12 +231,18 @@ class ProductService:
                 dto.name, session
             )
             if category_already_exists:
-                return CategoryWriteResult(success=False, info=f"Category {dto.name} already exists")
+                return CategoryWriteResult(
+                    success=False, info=f"Category {dto.name} already exists"
+                )
             session.add(category)
             await session.commit()
-        return CategoryWriteResult(success=True, category=CategoryItem.model_validate(category))
+        return CategoryWriteResult(
+            success=True, category=CategoryItem.model_validate(category)
+        )
 
-    async def update_category(self, guid: uuid.UUID, dto: CategoryWrite) -> CategoryWriteResult:
+    async def update_category(
+        self, guid: uuid.UUID, dto: CategoryWrite
+    ) -> CategoryWriteResult:
         updated_at = self._time_provider.now()
         stmt = (
             select(Category)
@@ -233,12 +253,16 @@ class ProductService:
             result = await session.execute(stmt)
             category = result.unique().scalar_one_or_none()
             if not category:
-                return CategoryWriteResult(success=False, info=f"Category {guid} not found")
+                return CategoryWriteResult(
+                    success=False, info=f"Category {guid} not found"
+                )
             category.name = dto.name
             category.updated_at = updated_at
             session.add(category)
             await session.commit()
-        return CategoryWriteResult(success=True, category=CategoryItem.model_validate(category))
+        return CategoryWriteResult(
+            success=True, category=CategoryItem.model_validate(category)
+        )
 
     async def get_category_list(self, page_number: int, page_size: int) -> CategoryList:
         categories_stmt = (
@@ -326,7 +350,9 @@ class ProductService:
         async with self._session_factory(expire_on_commit=False) as session:
             already_exists = await _does_brand_already_exist(dto.name, session)
             if already_exists:
-                return BrandWriteResult(success=False, info=f"Brand {dto.name} already exists")
+                return BrandWriteResult(
+                    success=False, info=f"Brand {dto.name} already exists"
+                )
             session.add(brand)
             await session.commit()
         return BrandWriteResult(success=True, brand=BrandItem.model_validate(brand))
@@ -377,7 +403,9 @@ class ProductService:
         created_at = self._time_provider.now()
         async with self._session_factory(expire_on_commit=False) as session:
             if await _does_tag_already_exist(dto.tag, session):
-                return TagWriteResult(success=False, info=f"Tag {dto.tag} already exists")
+                return TagWriteResult(
+                    success=False, info=f"Tag {dto.tag} already exists"
+                )
             tag = Tag(dto.tag, created_at)
             session.add(tag)
             await session.commit()
