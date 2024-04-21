@@ -24,7 +24,7 @@ class Result:
 
 
 @dataclass(init=True, frozen=True)
-class AddProductResult:
+class ProductWriteResult:
     success: bool
     product: typing.Optional[ProductDetail] = None
     info: typing.Optional[str] = None
@@ -39,27 +39,27 @@ class ProductService:
         self._session_factory = session_factory
         self._time_provider = time_provider
 
-    async def add_product(self, dto: ProductWrite) -> AddProductResult:
+    async def add_product(self, dto: ProductWrite) -> ProductWriteResult:
         created_at = self._time_provider.now()
         async with self._session_factory(expire_on_commit=False) as session:
             does_product_exist = await _does_product_already_exist(
                 dto.sku, dto.name, session
             )
             if does_product_exist:
-                return AddProductResult(
+                return ProductWriteResult(
                     success=False, info="Product of such sku or name already exists"
                 )
             tags = await _get_tags_by_guids(dto.tags_guids, session)
             if len(tags) < len(dto.tags_guids):
-                return AddProductResult(success=False, info="Not all requested tags were found")
+                return ProductWriteResult(success=False, info="Not all requested tags were found")
             category = await _get_category_or_none_by_guid(dto.category_guid, session)
             if not category:
-                return AddProductResult(
+                return ProductWriteResult(
                     success=False, info=f"Category {dto.category_guid} not found"
                 )
             brand = await _get_brand_or_none_by_guid(dto.brand_guid, session)
             if not brand:
-                return AddProductResult(success=False, info=f"Brand {dto.brand_guid} not found")
+                return ProductWriteResult(success=False, info=f"Brand {dto.brand_guid} not found")
             product = Product(
                 sku=dto.sku,
                 name=dto.name,
@@ -76,9 +76,9 @@ class ProductService:
             )
             session.add(product)
             await session.commit()
-        return AddProductResult(product=ProductDetail.validate(product), success=True)
+        return ProductWriteResult(product=ProductDetail.validate(product), success=True)
 
-    async def update_product(self, guid: uuid.UUID, dto: ProductWrite) -> Result:
+    async def update_product(self, guid: uuid.UUID, dto: ProductWrite) -> ProductWriteResult:
         updated_at = self._time_provider.now()
         stmt = (
             select(Product)
@@ -90,22 +90,22 @@ class ProductService:
                 joinedload(Product.tags),
             )
         )
-        async with self._session_factory() as session:
+        async with self._session_factory(expire_on_commit=False) as session:
             result = await session.execute(stmt)
             product = result.unique().scalar_one_or_none()
             if not product:
-                return Result(success=False, info=f"Product {guid} not found")
+                return ProductWriteResult(success=False, info=f"Product {guid} not found")
             tags = await _get_tags_by_guids(dto.tags_guids, session)
             if len(tags) < len(dto.tags_guids):
-                return Result(success=False, info="Not all requested tags were found")
+                return ProductWriteResult(success=False, info="Not all requested tags were found")
             category = await _get_category_or_none_by_guid(dto.category_guid, session)
             if not category:
-                return Result(
+                return ProductWriteResult(
                     success=False, info=f"Category {dto.category_guid} not found"
                 )
             brand = await _get_brand_or_none_by_guid(dto.brand_guid, session)
             if not brand:
-                return Result(success=False, info=f"Brand {dto.brand_guid} not found")
+                return ProductWriteResult(success=False, info=f"Brand {dto.brand_guid} not found")
             product.sku = dto.sku
             product.name = dto.name
             product.image_url = dto.image_url
@@ -121,7 +121,7 @@ class ProductService:
             product.updated_at = updated_at
             session.add(product)
             await session.commit()
-        return Result(success=True)
+        return ProductWriteResult(success=True, product=ProductDetail.model_validate(product))
 
     async def get_product_list(self, page_number: int, page_size: int) -> ProductList:
         products_stmt = (
