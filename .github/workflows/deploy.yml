@@ -31,7 +31,7 @@ jobs:
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
-        script: "cd shopery-backend && make test"
+        script: "cd shopery-backend && make tests"
     - name: Migrate
       uses: appleboy/ssh-action@v1.0.3
       with:
