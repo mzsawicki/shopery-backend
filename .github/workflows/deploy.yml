@@ -9,7 +9,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build
-      uses: sebastianjnuwu/ssh-action-deploy@v3
+      uses: appleboy/ssh-action@v1.0.3
       with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
@@ -17,7 +17,7 @@ jobs:
           port: ${{ secrets.PORT }}
           script: "make down; make build"
     - name: Lint
-      uses: sebastianjnuwu/ssh-action-deploy@v3
+      uses: appleboy/ssh-action@v1.0.3
       with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
@@ -25,7 +25,7 @@ jobs:
           port: ${{ secrets.PORT }}
           script: "make lint"
     - name: Migrate
-      uses: sebastianjnuwu/ssh-action-deploy@v3
+      uses: appleboy/ssh-action@v1.0.3
       with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
@@ -33,7 +33,7 @@ jobs:
           port: ${{ secrets.PORT }}
           script: "make migrate"
     - name: Deploy
-      uses: sebastianjnuwu/ssh-action-deploy@v3
+      uses: appleboy/ssh-action@v1.0.3
       with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
