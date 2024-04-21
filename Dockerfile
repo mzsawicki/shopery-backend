@@ -16,7 +16,7 @@ WORKDIR /application
 RUN cd /application
 COPY poetry.lock pyproject.toml alembic.ini mypy.init ./
 COPY alembic ./
-COPY SRC ./
+COPY src ./
 COPY config.env config.env
 
 RUN poetry config virtualenvs.create false
