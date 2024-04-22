@@ -99,7 +99,7 @@ async def get_categories(
     name="Create a new category",
 )
 async def post_category(dto: CategoryWrite, service: ProductService = Depends()):
-    result = await service.create_category(dto)
+    result = await service.add_category(dto)
     if result.success:
         return result.category
     else:

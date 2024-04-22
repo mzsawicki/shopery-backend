@@ -2,9 +2,10 @@ import math
 import typing
 import uuid
 from dataclasses import dataclass
+import logging
 
 from fastapi import Depends
-from sqlalchemy import func, select
+from sqlalchemy import func, select, or_
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import joinedload
 
@@ -67,6 +68,7 @@ class ProductService:
                 dto.sku, dto.name, session
             )
             if does_product_exist:
+                logging.warning(f"Attempt to add product that already exists ({dto.name}, sku: {dto.sku})")
                 return ProductWriteResult(
                     success=False, info="Product of such sku or name already exists"
                 )
@@ -225,7 +227,7 @@ class ProductService:
             await session.commit()
         return Result(success=True)
 
-    async def create_category(self, dto: CategoryWrite) -> CategoryWriteResult:
+    async def add_category(self, dto: CategoryWrite) -> CategoryWriteResult:
         created_at = self._time_provider.now()
         category = Category(dto.name, created_at)
         async with self._session_factory(expire_on_commit=False) as session:
@@ -493,8 +495,8 @@ async def _does_product_already_exist(
 ) -> bool:
     stmt = select(
         select(Product)
-        .where(Product.sku == product_sku)
-        .where(Product.name == product_name)
+        .where(or_(Product.sku == product_sku, Product.name == product_name))
+        .where(Product.removed_at.is_(None))
         .exists()
     )
     result = await session.execute(stmt)
