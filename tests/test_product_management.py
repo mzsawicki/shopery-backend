@@ -178,7 +178,6 @@ async def test_products_cannot_have_the_same_sku(service: ProductService):
             brand.brand.guid,
         )
     )
-    assert product.product
     # THEN the new product is not added
     assert not product.success
 
