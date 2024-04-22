@@ -1,11 +1,11 @@
+import logging
 import math
 import typing
 import uuid
 from dataclasses import dataclass
-import logging
 
 from fastapi import Depends
-from sqlalchemy import func, select, or_
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import joinedload
 
@@ -68,7 +68,6 @@ class ProductService:
                 dto.sku, dto.name, session
             )
             if does_product_exist:
-                logging.warning(f"Attempt to add product that already exists ({dto.name}, sku: {dto.sku})")
                 return ProductWriteResult(
                     success=False, info="Product of such sku or name already exists"
                 )
@@ -206,6 +205,7 @@ class ProductService:
             result = await session.execute(stmt)
         product = result.unique().scalar_one_or_none()
         if product:
+            assert product
             return ProductDetail.model_validate(product)
         else:
             return None

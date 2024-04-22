@@ -12,9 +12,7 @@ from src.common.sql import (connection_string_from_config,
                             create_database_engine, dispose_engine,
                             get_session_factory)
 from src.common.time import LocalTimeProvider
-from src.products.dto import (BrandWrite,
-                              CategoryWrite, NewTag,
-                              ProductWrite)
+from src.products.dto import BrandWrite, CategoryWrite, NewTag, ProductWrite
 from src.products.service import ProductService
 
 
@@ -65,22 +63,19 @@ def category_vegetables() -> CategoryWrite:
 
 def brand_farmery() -> BrandWrite:
     return BrandWrite(
-        name="Farmery",
-        logo_url="https://s3.eu-central-1.amazonaws.com/bucket/file"
+        name="Farmery", logo_url="https://s3.eu-central-1.amazonaws.com/bucket/file"
     )
 
 
 def product_chinese_cabbage_sku_2_51_594(
-    tags_guids: typing.List[uuid.UUID],
-    category_guid: uuid.UUID,
-    brand_guid: uuid.UUID
+    tags_guids: typing.List[uuid.UUID], category_guid: uuid.UUID, brand_guid: uuid.UUID
 ) -> ProductWrite:
     return ProductWrite(
         sku="2,51,594",
         name="Chinese Cabbage",
         image_url="https://s3.eu-central-1.amazonaws.com/bucket/file",
         description="Sed commodo aliquam dui ac porta. Fusce ipsum felis,"
-                    " imperdiet at posuere ac, viverra at mauris (...)",
+        " imperdiet at posuere ac, viverra at mauris (...)",
         base_price=Decimal("48.00"),
         discount=64,
         quantity=5413,
@@ -93,16 +88,14 @@ def product_chinese_cabbage_sku_2_51_594(
 
 
 def product_chinese_cabbage_sku_3_62_605(
-    tags_guids: typing.List[uuid.UUID],
-    category_guid: uuid.UUID,
-    brand_guid: uuid.UUID
+    tags_guids: typing.List[uuid.UUID], category_guid: uuid.UUID, brand_guid: uuid.UUID
 ):
     return ProductWrite(
         sku="3,62,605",
         name="Chinese Cabbage",
         image_url="https://s3.eu-central-1.amazonaws.com/bucket/file",
         description="Sed commodo aliquam dui ac porta. Fusce ipsum felis,"
-                    " imperdiet at posuere ac, viverra at mauris (...)",
+        " imperdiet at posuere ac, viverra at mauris (...)",
         base_price=Decimal("48.00"),
         discount=64,
         quantity=5413,
@@ -115,16 +108,14 @@ def product_chinese_cabbage_sku_3_62_605(
 
 
 def product_green_chili_sku_2_51_594(
-    tags_guids: typing.List[uuid.UUID],
-    category_guid: uuid.UUID,
-    brand_guid: uuid.UUID
+    tags_guids: typing.List[uuid.UUID], category_guid: uuid.UUID, brand_guid: uuid.UUID
 ) -> ProductWrite:
     return ProductWrite(
         sku="2,51,594",
         name="Green Chili",
         image_url="https://s3.eu-central-1.amazonaws.com/bucket/file",
         description="Sed commodo aliquam dui ac porta. Fusce ipsum felis,"
-                    " imperdiet at posuere ac, viverra at mauris (...)",
+        " imperdiet at posuere ac, viverra at mauris (...)",
         base_price=Decimal("10.00"),
         discount=10,
         quantity=6000,
@@ -140,15 +131,21 @@ async def test_product_added(service: ProductService):
     # GIVEN clean state
     # WHEN a product is added
     tag = await service.add_tag(tag_green())
+    assert tag.tag
     brand = await service.add_brand(brand_farmery())
+    assert brand.brand
     category = await service.add_category(category_vegetables())
+    assert category.category
     product = await service.add_product(
         product_chinese_cabbage_sku_2_51_594(
-            [tag.tag.guid,],
+            [
+                tag.tag.guid,
+            ],
             category.category.guid,
-            brand.brand.guid
+            brand.brand.guid,
         )
     )
+    assert product.product
     # THEN it can be retrieved
     result = await service.get_product_details(product.product.guid)
     assert result and result.guid == product.product.guid
@@ -157,23 +154,31 @@ async def test_product_added(service: ProductService):
 async def test_products_cannot_have_the_same_sku(service: ProductService):
     # GIVEN a product existing
     tag = await service.add_tag(tag_green())
+    assert tag.tag
     brand = await service.add_brand(brand_farmery())
+    assert brand.brand
     category = await service.add_category(category_vegetables())
+    assert category.category
     await service.add_product(
         product_chinese_cabbage_sku_2_51_594(
-            [tag.tag.guid, ],
+            [
+                tag.tag.guid,
+            ],
             category.category.guid,
-            brand.brand.guid
+            brand.brand.guid,
         )
     )
     # WHEN there is an attempt to add another product with the same sku
     product = await service.add_product(
         product_green_chili_sku_2_51_594(
-            [tag.tag.guid, ],
+            [
+                tag.tag.guid,
+            ],
             category.category.guid,
-            brand.brand.guid
+            brand.brand.guid,
         )
     )
+    assert product.product
     # THEN the new product is not added
     assert not product.success
 
@@ -181,21 +186,28 @@ async def test_products_cannot_have_the_same_sku(service: ProductService):
 async def test_products_cannot_have_the_same_name(service: ProductService):
     # GIVEN a product existing
     tag = await service.add_tag(tag_green())
+    assert tag.tag
     brand = await service.add_brand(brand_farmery())
+    assert brand.brand
     category = await service.add_category(category_vegetables())
+    assert category.category
     await service.add_product(
         product_chinese_cabbage_sku_2_51_594(
-            [tag.tag.guid, ],
+            [
+                tag.tag.guid,
+            ],
             category.category.guid,
-            brand.brand.guid
+            brand.brand.guid,
         )
     )
     # WHEN there is an attempt to add another product with the same name
     product = await service.add_product(
         product_chinese_cabbage_sku_3_62_605(
-            [tag.tag.guid, ],
+            [
+                tag.tag.guid,
+            ],
             category.category.guid,
-            brand.brand.guid
+            brand.brand.guid,
         )
     )
     # THEN the new product is not added
@@ -206,13 +218,14 @@ async def test_product_cannot_have_nonexistent_tags(service: ProductService):
     # GIVEN clean state
     # WHEN there is attempt to add a product with non-existent tag
     tag = await service.add_tag(tag_green())
+    assert tag.tag
     brand = await service.add_brand(brand_farmery())
+    assert brand.brand
     category = await service.add_category(category_vegetables())
+    assert category.category
     product = await service.add_product(
         product_chinese_cabbage_sku_2_51_594(
-            [tag.tag.guid, uuid.uuid4()],
-            category.category.guid,
-            brand.brand.guid
+            [tag.tag.guid, uuid.uuid4()], category.category.guid, brand.brand.guid
         )
     )
     # THEN it fails
@@ -222,24 +235,33 @@ async def test_product_cannot_have_nonexistent_tags(service: ProductService):
 async def test_product_updates(service: ProductService):
     # GIVEN a product existing
     tag = await service.add_tag(tag_green())
+    assert tag.tag
     brand = await service.add_brand(brand_farmery())
+    assert brand.brand
     category = await service.add_category(category_vegetables())
+    assert category.category
     product = await service.add_product(
         product_chinese_cabbage_sku_2_51_594(
-            [tag.tag.guid, ],
+            [
+                tag.tag.guid,
+            ],
             category.category.guid,
-            brand.brand.guid
+            brand.brand.guid,
         )
     )
+    assert product.product
     # WHEN a product manager updates the product's data
     product_after_update = await service.update_product(
         product.product.guid,
         product_chinese_cabbage_sku_3_62_605(
-            [tag.tag.guid,],
+            [
+                tag.tag.guid,
+            ],
             category.category.guid,
-            brand.brand.guid
-        )
+            brand.brand.guid,
+        ),
     )
+    assert product_after_update.product
     # THEN the change is reflected
     assert product_after_update.product.sku == "3,62,605"
 
@@ -247,15 +269,21 @@ async def test_product_updates(service: ProductService):
 async def test_product_deletes(service: ProductService):
     # GIVEN a product existing
     tag = await service.add_tag(tag_green())
+    assert tag.tag
     brand = await service.add_brand(brand_farmery())
+    assert brand.brand
     category = await service.add_category(category_vegetables())
+    assert category.category
     product = await service.add_product(
         product_chinese_cabbage_sku_2_51_594(
-            [tag.tag.guid, ],
+            [
+                tag.tag.guid,
+            ],
             category.category.guid,
-            brand.brand.guid
+            brand.brand.guid,
         )
     )
+    assert product.product
     # WHEN the product is removed
     await service.remove_product(product.product.guid)
     found_product = await service.get_product_details(product.product.guid)
