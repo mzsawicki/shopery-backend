@@ -4,11 +4,13 @@ on:
   push:
     branches: [ "main" ]
 jobs:
-  checkout:
+  deploy:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     - name: Build
       uses: appleboy/ssh-action@v1.0.3
       with:
