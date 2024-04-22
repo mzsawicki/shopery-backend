@@ -6,8 +6,6 @@ services:
       - config.test.env
     ports:
       - "5433:5433"
-    volumes:
-      - /tmp:/tmp
     command: -p 5433
   tests:
     depends_on:

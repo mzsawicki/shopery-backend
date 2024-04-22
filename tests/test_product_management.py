@@ -1,3 +1,4 @@
+import logging
 import typing
 import uuid
 from decimal import Decimal
@@ -54,11 +55,11 @@ async def service(database) -> ProductService:
 
 
 def tag_green() -> NewTag:
-    return NewTag(tag="green")
+    return NewTag(en="Green", pl="Zielone")
 
 
 def category_vegetables() -> CategoryWrite:
-    return CategoryWrite(name="Vegetables")
+    return CategoryWrite(name_en="Vegetables", name_pl="Warzywa")
 
 
 def brand_farmery() -> BrandWrite:
@@ -72,15 +73,20 @@ def product_chinese_cabbage_sku_2_51_594(
 ) -> ProductWrite:
     return ProductWrite(
         sku="2,51,594",
-        name="Chinese Cabbage",
+        name_en="Chinese Cabbage",
+        name_pl="Kapusta Chińska",
         image_url="https://s3.eu-central-1.amazonaws.com/bucket/file",
-        description="Sed commodo aliquam dui ac porta. Fusce ipsum felis,"
+        description_en="Sed commodo aliquam dui ac porta. Fusce ipsum felis,"
         " imperdiet at posuere ac, viverra at mauris (...)",
-        base_price=Decimal("48.00"),
+        description_pl="Sed commodo aliquam dui ac porta. Fusce ipsum felis,"
+        " imperdiet at posuere ac, viverra at mauris (...)",
+        base_price_usd=Decimal("48.00"),
+        base_price_pln=Decimal("194.43"),
         discount=64,
         quantity=5413,
         weight=3,
-        color="Green",
+        color_en="Green",
+        color_pl="Zielony",
         tags_guids=tags_guids,
         category_guid=category_guid,
         brand_guid=brand_guid,
@@ -92,15 +98,20 @@ def product_chinese_cabbage_sku_3_62_605(
 ):
     return ProductWrite(
         sku="3,62,605",
-        name="Chinese Cabbage",
+        name_en="Chinese Cabbage",
+        name_pl="Kapusta Chińska",
         image_url="https://s3.eu-central-1.amazonaws.com/bucket/file",
-        description="Sed commodo aliquam dui ac porta. Fusce ipsum felis,"
-        " imperdiet at posuere ac, viverra at mauris (...)",
-        base_price=Decimal("48.00"),
+        description_en="Sed commodo aliquam dui ac porta. Fusce ipsum felis,"
+                       " imperdiet at posuere ac, viverra at mauris (...)",
+        description_pl="Sed commodo aliquam dui ac porta. Fusce ipsum felis,"
+                       " imperdiet at posuere ac, viverra at mauris (...)",
+        base_price_usd=Decimal("48.00"),
+        base_price_pln=Decimal("194.43"),
         discount=64,
         quantity=5413,
         weight=3,
-        color="Green",
+        color_en="Green",
+        color_pl="Zielony",
         tags_guids=tags_guids,
         category_guid=category_guid,
         brand_guid=brand_guid,
@@ -112,15 +123,20 @@ def product_green_chili_sku_2_51_594(
 ) -> ProductWrite:
     return ProductWrite(
         sku="2,51,594",
-        name="Green Chili",
+        name_en="Green Chili",
+        name_pl="Chili zielone",
         image_url="https://s3.eu-central-1.amazonaws.com/bucket/file",
-        description="Sed commodo aliquam dui ac porta. Fusce ipsum felis,"
+        description_en="Sed commodo aliquam dui ac porta. Fusce ipsum felis,"
         " imperdiet at posuere ac, viverra at mauris (...)",
-        base_price=Decimal("10.00"),
+        description_pl="Sed commodo aliquam dui ac porta. Fusce ipsum felis,"
+                       " imperdiet at posuere ac, viverra at mauris (...)",
+        base_price_usd=Decimal("10.00"),
+        base_price_pln=Decimal("40.52"),
         discount=10,
         quantity=6000,
         weight=1,
-        color="Green",
+        color_en="Green",
+        color_pl="Zielony",
         tags_guids=tags_guids,
         category_guid=category_guid,
         brand_guid=brand_guid,

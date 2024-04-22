@@ -42,19 +42,22 @@ class Category(Entity):
     guid: Mapped[uuid.UUID] = mapped_column(
         postgresql.UUID(as_uuid=True), primary_key=True
     )
-    name: Mapped[str] = mapped_column(String(64), nullable=False)
+    name_en: Mapped[str] = mapped_column(String(64), nullable=False)
+    name_pl: Mapped[str] = mapped_column(String(64), nullable=False)
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
     updated_at: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
     removed_at: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=True)
 
-    UniqueConstraint(name, removed_at, name="unique_category_name")
+    UniqueConstraint(name_en, removed_at, name="unique_category_name_en")
+    UniqueConstraint(name_pl, removed_at, name="unique_category_name_pl")
 
     __tablename__ = "categories"
     __table_args__ = {"schema": SCHEMA}
 
-    def __init__(self, name: str, created_at: datetime.datetime):
+    def __init__(self, name_en: str, name_pl, created_at: datetime.datetime):
         self.guid: uuid.UUID = uuid.uuid4()
-        self.name: str = name
+        self.name_en: str = name_en
+        self.name_pl: str = name_pl
         self.created_at: datetime.datetime = created_at
         self.updated_at: datetime.datetime = created_at
 
@@ -63,18 +66,21 @@ class Tag(Entity):
     guid: Mapped[uuid.UUID] = mapped_column(
         postgresql.UUID(as_uuid=True), primary_key=True
     )
-    tag: Mapped[str] = mapped_column(String(16), nullable=False)
+    pl: Mapped[str] = mapped_column(String(16), nullable=False)
+    en: Mapped[str] = mapped_column(String(16), nullable=False)
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
     removed_at: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=True)
 
-    UniqueConstraint(tag, removed_at, name="unique_tag")
+    UniqueConstraint(pl, removed_at, name="unique_tag_pl")
+    UniqueConstraint(en, removed_at, name="unique_tag_en")
 
     __tablename__ = "tags"
     __table_args__ = {"schema": SCHEMA}
 
-    def __init__(self, tag: str, created_at: datetime.datetime):
+    def __init__(self, en: str, pl: str, created_at: datetime.datetime):
         self.guid: uuid.UUID = uuid.uuid4()
-        self.tag: str = tag
+        self.en: str = en
+        self.pl: str = pl
         self.created_at: datetime.datetime = created_at
 
 
@@ -92,10 +98,15 @@ class Product(Entity):
         postgresql.UUID(as_uuid=True), primary_key=True
     )
     sku: Mapped[str] = mapped_column(String(16), nullable=False)
-    name: Mapped[str] = mapped_column(String(64), nullable=False)
+    name_en: Mapped[str] = mapped_column(String(64), nullable=False)
+    name_pl: Mapped[str] = mapped_column(String(64), nullable=False)
     image_url: Mapped[typing.Optional[str]] = mapped_column(String(256), nullable=True)
-    description: Mapped[str] = mapped_column(Text, nullable=False)
-    base_price: Mapped[Decimal] = mapped_column(
+    description_en: Mapped[str] = mapped_column(Text, nullable=False)
+    description_pl: Mapped[str] = mapped_column(Text, nullable=False)
+    base_price_usd: Mapped[Decimal] = mapped_column(
+        postgresql.NUMERIC(AMOUNT_NUMERIC_PRECISION), nullable=False
+    )
+    base_price_pln: Mapped[Decimal] = mapped_column(
         postgresql.NUMERIC(AMOUNT_NUMERIC_PRECISION), nullable=False
     )
     discount: Mapped[Integer] = mapped_column(Integer, nullable=True)
@@ -103,7 +114,8 @@ class Product(Entity):
         postgresql.NUMERIC(AMOUNT_NUMERIC_PRECISION), nullable=False
     )
     weight: Mapped[int] = mapped_column(Integer, nullable=False)
-    color: Mapped[str] = mapped_column(String(32), nullable=False)
+    color_en: Mapped[str] = mapped_column(String(32), nullable=False)
+    color_pl: Mapped[str] = mapped_column(String(32), nullable=False)
     tags: Mapped[typing.List[Tag]] = relationship(secondary=products_tags)
     category_guid: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("products.categories.guid")
@@ -116,7 +128,8 @@ class Product(Entity):
     removed_at: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=True)
 
     UniqueConstraint(sku, removed_at, name="unique_product_sku")
-    UniqueConstraint(name, removed_at, name="unique_product_name")
+    UniqueConstraint(name_en, removed_at, name="unique_product_name_en")
+    UniqueConstraint(name_pl, removed_at, name="unique_product_name_pl")
 
     __tablename__ = "products"
     __table_args__ = {"schema": SCHEMA}
@@ -124,12 +137,17 @@ class Product(Entity):
     def __init__(
         self,
         sku: str,
-        name: str,
-        description: str,
-        base_price: Decimal,
+        name_en: str,
+        name_pl: str,
+        description_en: str,
+        description_pl: str,
+        base_price_usd: Decimal,
+        base_price_pln: Decimal,
+        discount: int,
         quantity: Decimal,
         weight: int,
-        color: str,
+        color_en: str,
+        color_pl: str,
         category: Category,
         brand: Brand,
         tags: typing.List[Tag],
@@ -138,12 +156,17 @@ class Product(Entity):
     ):
         self.guid: uuid.UUID = uuid.uuid4()
         self.sku: str = sku
-        self.name: str = name
-        self.description: str = description
-        self.base_price: Decimal = base_price
+        self.name_en: str = name_en
+        self.name_pl: str = name_pl
+        self.description_en: str = description_en
+        self.description_pl: str = description_pl
+        self.base_price_usd: Decimal = base_price_usd
+        self.base_price_pln: Decimal = base_price_pln
+        self.discount: int = discount
         self.quantity: Decimal = quantity
         self.weight: int = weight
-        self.color: str = color
+        self.color_en: str = color_en
+        self.color_pl: str = color_pl
         self.category: Category = category
         self.brand: Brand = brand
         self.tags: typing.List[Tag] = tags

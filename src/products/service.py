@@ -1,4 +1,3 @@
-import logging
 import math
 import typing
 import uuid
@@ -64,9 +63,7 @@ class ProductService:
     async def add_product(self, dto: ProductWrite) -> ProductWriteResult:
         created_at = self._time_provider.now()
         async with self._session_factory(expire_on_commit=False) as session:
-            does_product_exist = await _does_product_already_exist(
-                dto.sku, dto.name, session
-            )
+            does_product_exist = await _does_product_already_exist(dto.sku, dto.name_en, dto.name_pl, session)
             if does_product_exist:
                 return ProductWriteResult(
                     success=False, info="Product of such sku or name already exists"
@@ -87,18 +84,11 @@ class ProductService:
                     success=False, info=f"Brand {dto.brand_guid} not found"
                 )
             product = Product(
-                sku=dto.sku,
-                name=dto.name,
-                description=dto.description,
-                base_price=dto.base_price,
-                quantity=dto.quantity,
-                weight=dto.weight,
-                color=dto.color,
-                image_url=dto.image_url,
+                **dto.model_dump(exclude={"tags_guids", "category_guid", "brand_guid"}),
+                tags=tags,
                 category=category,
                 brand=brand,
-                tags=tags,
-                created_at=created_at,
+                created_at=created_at
             )
             session.add(product)
             await session.commit()
@@ -143,14 +133,18 @@ class ProductService:
                     success=False, info=f"Brand {dto.brand_guid} not found"
                 )
             product.sku = dto.sku
-            product.name = dto.name
+            product.name_en = dto.name_en
+            product.name_pl = dto.name_pl
             product.image_url = dto.image_url
-            product.description = dto.description
-            product.base_price = dto.base_price
+            product.description_en = dto.description_en
+            product.description_pl = dto.description_pl
+            product.base_price_usd = dto.base_price_usd
+            product.base_price_pln = dto.base_price_pln
             product.discount = dto.discount
             product.quantity = dto.quantity
             product.weight = dto.weight
-            product.color = dto.color
+            product.color_en = dto.color_en
+            product.color_pl = dto.color_pl
             product.tags = tags
             product.category = category
             product.brand = brand
@@ -229,14 +223,14 @@ class ProductService:
 
     async def add_category(self, dto: CategoryWrite) -> CategoryWriteResult:
         created_at = self._time_provider.now()
-        category = Category(dto.name, created_at)
+        category = Category(dto.name_en, dto.name_pl, created_at)
         async with self._session_factory(expire_on_commit=False) as session:
             category_already_exists = await _does_category_already_exist(
-                dto.name, session
+                dto.name_en, dto.name_pl, session
             )
             if category_already_exists:
                 return CategoryWriteResult(
-                    success=False, info=f"Category {dto.name} already exists"
+                    success=False, info=f"Category {dto.name_en}/{dto.name_pl} already exists"
                 )
             session.add(category)
             await session.commit()
@@ -260,7 +254,8 @@ class ProductService:
                 return CategoryWriteResult(
                     success=False, info=f"Category {guid} not found"
                 )
-            category.name = dto.name
+            category.name_en = dto.name_en
+            category.name_pl = dto.name_pl
             category.updated_at = updated_at
             session.add(category)
             await session.commit()
@@ -406,11 +401,11 @@ class ProductService:
     async def add_tag(self, dto: NewTag) -> TagWriteResult:
         created_at = self._time_provider.now()
         async with self._session_factory(expire_on_commit=False) as session:
-            if await _does_tag_already_exist(dto.tag, session):
+            if await _does_tag_already_exist(dto.en, dto.pl, session):
                 return TagWriteResult(
-                    success=False, info=f"Tag {dto.tag} already exists"
+                    success=False, info=f"Tag {dto.en}/{dto.pl} already exists"
                 )
-            tag = Tag(dto.tag, created_at)
+            tag = Tag(dto.en, dto.pl, created_at)
             session.add(tag)
             await session.commit()
         return TagWriteResult(success=True, tag=TagItem.model_validate(tag))
@@ -491,11 +486,11 @@ async def _get_brand_or_none_by_guid(
 
 
 async def _does_product_already_exist(
-    product_sku: str, product_name: str, session: AsyncSession
+    product_sku: str, product_name_en: str, product_name_pl: str, session: AsyncSession
 ) -> bool:
     stmt = select(
         select(Product)
-        .where(or_(Product.sku == product_sku, Product.name == product_name))
+        .where(or_(Product.sku == product_sku, Product.name_en == product_name_en, Product.name_pl == product_name_pl))
         .where(Product.removed_at.is_(None))
         .exists()
     )
@@ -503,10 +498,10 @@ async def _does_product_already_exist(
     return result.scalar_one()
 
 
-async def _does_category_already_exist(name: str, session: AsyncSession) -> bool:
+async def _does_category_already_exist(name_en: str, name_pl: str, session: AsyncSession) -> bool:
     stmt = select(
         select(Category)
-        .where(Category.name == name)
+        .where(or_(Category.name_en == name_en, Category.name_pl == name_pl))
         .where(Category.removed_at.is_(None))
         .exists()
     )
@@ -525,9 +520,9 @@ async def _does_brand_already_exist(name: str, session: AsyncSession) -> bool:
     return result.scalar_one()
 
 
-async def _does_tag_already_exist(tag: str, session: AsyncSession) -> bool:
+async def _does_tag_already_exist(en: str, pl: str, session: AsyncSession) -> bool:
     stmt = select(
-        select(Tag).where(Tag.tag == tag).where(Tag.removed_at.is_(None)).exists()
+        select(Tag).where(or_(Tag.en == en, Tag.pl == pl)).where(Tag.removed_at.is_(None)).exists()
     )
     result = await session.execute(stmt)
     return result.scalar_one()
