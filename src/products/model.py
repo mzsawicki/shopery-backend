@@ -109,7 +109,7 @@ class Product(Entity):
     base_price_pln: Mapped[Decimal] = mapped_column(
         postgresql.NUMERIC(AMOUNT_NUMERIC_PRECISION), nullable=False
     )
-    discount: Mapped[Integer] = mapped_column(Integer, nullable=True)
+    discount: Mapped[typing.Optional[int]] = mapped_column(Integer, nullable=True)
     quantity: Mapped[Decimal] = mapped_column(
         postgresql.NUMERIC(AMOUNT_NUMERIC_PRECISION), nullable=False
     )
@@ -143,7 +143,6 @@ class Product(Entity):
         description_pl: str,
         base_price_usd: Decimal,
         base_price_pln: Decimal,
-        discount: int,
         quantity: Decimal,
         weight: int,
         color_en: str,
@@ -152,6 +151,7 @@ class Product(Entity):
         brand: Brand,
         tags: typing.List[Tag],
         created_at: datetime.datetime,
+        discount: typing.Optional[int] = None,
         image_url: typing.Optional[str] = None,
     ):
         self.guid: uuid.UUID = uuid.uuid4()
@@ -162,7 +162,7 @@ class Product(Entity):
         self.description_pl: str = description_pl
         self.base_price_usd: Decimal = base_price_usd
         self.base_price_pln: Decimal = base_price_pln
-        self.discount: int = discount
+        self.discount: typing.Optional[int] = discount
         self.quantity: Decimal = quantity
         self.weight: int = weight
         self.color_en: str = color_en

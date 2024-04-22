@@ -63,7 +63,9 @@ class ProductService:
     async def add_product(self, dto: ProductWrite) -> ProductWriteResult:
         created_at = self._time_provider.now()
         async with self._session_factory(expire_on_commit=False) as session:
-            does_product_exist = await _does_product_already_exist(dto.sku, dto.name_en, dto.name_pl, session)
+            does_product_exist = await _does_product_already_exist(
+                dto.sku, dto.name_en, dto.name_pl, session
+            )
             if does_product_exist:
                 return ProductWriteResult(
                     success=False, info="Product of such sku or name already exists"
@@ -88,7 +90,7 @@ class ProductService:
                 tags=tags,
                 category=category,
                 brand=brand,
-                created_at=created_at
+                created_at=created_at,
             )
             session.add(product)
             await session.commit()
@@ -230,7 +232,8 @@ class ProductService:
             )
             if category_already_exists:
                 return CategoryWriteResult(
-                    success=False, info=f"Category {dto.name_en}/{dto.name_pl} already exists"
+                    success=False,
+                    info=f"Category {dto.name_en}/{dto.name_pl} already exists",
                 )
             session.add(category)
             await session.commit()
@@ -490,7 +493,13 @@ async def _does_product_already_exist(
 ) -> bool:
     stmt = select(
         select(Product)
-        .where(or_(Product.sku == product_sku, Product.name_en == product_name_en, Product.name_pl == product_name_pl))
+        .where(
+            or_(
+                Product.sku == product_sku,
+                Product.name_en == product_name_en,
+                Product.name_pl == product_name_pl,
+            )
+        )
         .where(Product.removed_at.is_(None))
         .exists()
     )
@@ -498,7 +507,9 @@ async def _does_product_already_exist(
     return result.scalar_one()
 
 
-async def _does_category_already_exist(name_en: str, name_pl: str, session: AsyncSession) -> bool:
+async def _does_category_already_exist(
+    name_en: str, name_pl: str, session: AsyncSession
+) -> bool:
     stmt = select(
         select(Category)
         .where(or_(Category.name_en == name_en, Category.name_pl == name_pl))
@@ -522,7 +533,10 @@ async def _does_brand_already_exist(name: str, session: AsyncSession) -> bool:
 
 async def _does_tag_already_exist(en: str, pl: str, session: AsyncSession) -> bool:
     stmt = select(
-        select(Tag).where(or_(Tag.en == en, Tag.pl == pl)).where(Tag.removed_at.is_(None)).exists()
+        select(Tag)
+        .where(or_(Tag.en == en, Tag.pl == pl))
+        .where(Tag.removed_at.is_(None))
+        .exists()
     )
     result = await session.execute(stmt)
     return result.scalar_one()

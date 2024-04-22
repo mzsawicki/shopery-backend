@@ -102,9 +102,9 @@ def product_chinese_cabbage_sku_3_62_605(
         name_pl="Kapusta Chińska",
         image_url="https://s3.eu-central-1.amazonaws.com/bucket/file",
         description_en="Sed commodo aliquam dui ac porta. Fusce ipsum felis,"
-                       " imperdiet at posuere ac, viverra at mauris (...)",
+        " imperdiet at posuere ac, viverra at mauris (...)",
         description_pl="Sed commodo aliquam dui ac porta. Fusce ipsum felis,"
-                       " imperdiet at posuere ac, viverra at mauris (...)",
+        " imperdiet at posuere ac, viverra at mauris (...)",
         base_price_usd=Decimal("48.00"),
         base_price_pln=Decimal("194.43"),
         discount=64,
@@ -129,7 +129,7 @@ def product_green_chili_sku_2_51_594(
         description_en="Sed commodo aliquam dui ac porta. Fusce ipsum felis,"
         " imperdiet at posuere ac, viverra at mauris (...)",
         description_pl="Sed commodo aliquam dui ac porta. Fusce ipsum felis,"
-                       " imperdiet at posuere ac, viverra at mauris (...)",
+        " imperdiet at posuere ac, viverra at mauris (...)",
         base_price_usd=Decimal("10.00"),
         base_price_pln=Decimal("40.52"),
         discount=10,
