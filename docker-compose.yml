@@ -8,6 +8,12 @@ services:
       - config.env
     ports:
       - "5432:5432"
+  fake-s3:
+    image: lphoward/fake-s3
+    ports:
+      - "4569:4569"
+    volumes:
+      - ../:/fake-s3
   api:
     build:
       context: .
@@ -22,6 +28,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 volumes:
   db_data:
+    external: true
     driver: local
   cache:
     driver: local
