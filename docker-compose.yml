@@ -8,12 +8,19 @@ services:
       - config.env
     ports:
       - "5432:5432"
-  fake-s3:
-    image: lphoward/fake-s3
+  localstack:
+    container_name: "localstack-main"
+    image: localstack/localstack
     ports:
-      - "4569:4569"
+      - "4566:4566"
+      - "4510-4559:4510-4559"
+    environment:
+      - DEBUG=0
+      - PERSISTENCE=1
+      - SERVICES=s3
     volumes:
-      - ../:/fake-s3
+      - localstack:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
   api:
     build:
       context: .
@@ -29,3 +36,4 @@ services:
 volumes:
   db_data:
     driver: local
+  localstack:

@@ -5,8 +5,8 @@ from pydantic_settings import BaseSettings
 
 
 class Config(BaseSettings):
-    # Dev mode
-    dev_mode: bool = Field(default=False)
+    # Development
+    enable_local_aws_emulation: bool
 
     # Filesystem
     base_dir: Path = Path(__file__).parent.parent.parent
@@ -26,3 +26,9 @@ class Config(BaseSettings):
     # Redis (in-memory database)
     redis_database_host: str = Field()
     redis_database_port: int = Field()
+
+    # AWS S3
+    s3_url: str = Field()
+    aws_access_key_id: str = Field()
+    aws_secret_access_key: str = Field()
+    s3_region: str = Field()

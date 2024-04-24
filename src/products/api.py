@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Response, status, UploadFile
 from fastapi.responses import JSONResponse
 
 from src.products.dto import (BrandItem, BrandList, BrandWrite, CategoryItem,
@@ -239,3 +239,29 @@ async def delete_tag(guid: uuid.UUID, service: ProductService = Depends()):
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST, content={"detail": result.info}
         )
+
+
+@router.post(
+    "/product-images",
+    status_code=status.HTTP_201_CREATED,
+    name="Upload product image"
+)
+async def post_product_image(file: UploadFile, service: ProductService = Depends()):
+    result = service.upload_product_image(file.file)
+    if result.success:
+        return Response(status_code=status.HTTP_201_CREATED)
+    else:
+        return Response(status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+
+@router.post(
+    "/brand-logos",
+    status_code=status.HTTP_201_CREATED,
+    name="Upload brand logo"
+)
+async def post_product_image(file: UploadFile, service: ProductService = Depends()):
+    result = service.upload_brand_logo(file.file)
+    if result.success:
+        return Response(status_code=status.HTTP_201_CREATED)
+    else:
+        return Response(status_code=status.HTTP_503_SERVICE_UNAVAILABLE)

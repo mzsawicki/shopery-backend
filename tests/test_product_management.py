@@ -1,4 +1,3 @@
-import logging
 import typing
 import uuid
 from decimal import Decimal
@@ -9,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncConnection, async_sessionmaker
 import alembic.config
 from alembic import command
 from src.common.config import Config
+from src.common.s3 import get_local_s3_gateway
 from src.common.sql import (connection_string_from_config,
                             create_database_engine, dispose_engine,
                             get_session_factory)
@@ -51,7 +51,7 @@ async def database() -> typing.AsyncGenerator[async_sessionmaker, None]:
 
 @pytest.fixture(scope="function")
 async def service(database) -> ProductService:
-    return ProductService(database, LocalTimeProvider())
+    return ProductService(database, get_local_s3_gateway(), LocalTimeProvider())
 
 
 def tag_green() -> NewTag:

@@ -165,3 +165,7 @@ class BrandList(BaseModel):
     pages_count: int = Field(examples=[10])
     page_size: int = Field(examples=[5])
     items: typing.List[BrandItem]
+
+
+class FileUploadResponse(BaseModel):
+    file_url: str = Field(examples=["https://s3.eu-central-1.amazonaws.com/bucket/file"])
