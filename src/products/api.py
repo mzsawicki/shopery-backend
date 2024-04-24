@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, Response, UploadFile, status
 from fastapi.responses import JSONResponse
 
 from src.products.dto import (BrandItem, BrandList, BrandWrite, CategoryItem,
-                              CategoryList, CategoryWrite, NewTag,
-                              ProductDetail, ProductList, ProductWrite,
-                              TagItem, TagsList, FileUploadResponse)
+                              CategoryList, CategoryWrite, FileUploadResponse,
+                              NewTag, ProductDetail, ProductList, ProductWrite,
+                              TagItem, TagsList)
 from src.products.service import ProductService
 
 router = APIRouter(tags=["product management"])
