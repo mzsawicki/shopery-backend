@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, Response, status, UploadFile
+from fastapi import APIRouter, Depends, Response, UploadFile, status
 from fastapi.responses import JSONResponse
 
 from src.products.dto import (BrandItem, BrandList, BrandWrite, CategoryItem,
@@ -242,9 +242,7 @@ async def delete_tag(guid: uuid.UUID, service: ProductService = Depends()):
 
 
 @router.post(
-    "/product-images",
-    status_code=status.HTTP_201_CREATED,
-    name="Upload product image"
+    "/product-images", status_code=status.HTTP_201_CREATED, name="Upload product image"
 )
 async def post_product_image(file: UploadFile, service: ProductService = Depends()):
     result = service.upload_product_image(file.file)
@@ -255,11 +253,9 @@ async def post_product_image(file: UploadFile, service: ProductService = Depends
 
 
 @router.post(
-    "/brand-logos",
-    status_code=status.HTTP_201_CREATED,
-    name="Upload brand logo"
+    "/brand-logos", status_code=status.HTTP_201_CREATED, name="Upload brand logo"
 )
-async def post_product_image(file: UploadFile, service: ProductService = Depends()):
+async def post_brand_logo(file: UploadFile, service: ProductService = Depends()):
     result = service.upload_brand_logo(file.file)
     if result.success:
         return Response(status_code=status.HTTP_201_CREATED)

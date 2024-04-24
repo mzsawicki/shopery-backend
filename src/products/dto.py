@@ -168,4 +168,6 @@ class BrandList(BaseModel):
 
 
 class FileUploadResponse(BaseModel):
-    file_url: str = Field(examples=["https://s3.eu-central-1.amazonaws.com/bucket/file"])
+    file_url: str = Field(
+        examples=["https://s3.eu-central-1.amazonaws.com/bucket/file"]
+    )
