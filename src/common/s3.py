@@ -1,3 +1,4 @@
+import abc
 import logging
 import typing
 from dataclasses import dataclass
@@ -14,9 +15,17 @@ class UploadResult:
     uploaded_file_path: typing.Optional[str] = None
 
 
+class ObjectStorageGateway(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def upload_file(
+            self, bucket: str, file_key: str, file: typing.BinaryIO
+    ) -> UploadResult:
+        pass
+
+
 class S3Gateway:
     def __init__(self, **kwargs):
-        self._url = kwargs.get("endpoint_url")
+        self._emulated_url = kwargs.pop("emulated_url", kwargs.get("endpoint_url"))
         self._client = boto3.client("s3", **kwargs)
 
     def upload_file(
@@ -25,7 +34,7 @@ class S3Gateway:
         try:
             self._client.upload_fileobj(file, bucket, file_key)
             return UploadResult(
-                success=True, uploaded_file_path=f"{self._url}/{bucket}/{file_key}"
+                success=True, uploaded_file_path=f"{self._emulated_url}/{bucket}/{file_key}"
             )
         except ClientError as error:
             logging.error(error)
@@ -39,4 +48,5 @@ def get_local_s3_gateway() -> S3Gateway:
         aws_secret_access_key=config.aws_secret_access_key,
         region_name=config.s3_region,
         endpoint_url=config.s3_url,
+        emulated_url=config.emulated_s3_url
     )

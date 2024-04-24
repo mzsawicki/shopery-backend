@@ -8,7 +8,7 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import joinedload
 
-from src.common.s3 import S3Gateway, UploadResult, get_local_s3_gateway
+from src.common.s3 import ObjectStorageGateway, UploadResult
 from src.common.sql import SQLDatabase
 from src.common.time import LocalTimeProvider, TimeProvider
 from src.products.dto import (BrandItem, BrandList, BrandWrite, CategoryItem,
@@ -56,7 +56,7 @@ class ProductService:
     def __init__(
         self,
         session_factory: async_sessionmaker = Depends(SQLDatabase),
-        s3_gateway: S3Gateway = Depends(S3Gateway),
+        s3_gateway: ObjectStorageGateway = Depends(ObjectStorageGateway),
         time_provider: TimeProvider = Depends(LocalTimeProvider),
     ):
         self._session_factory = session_factory

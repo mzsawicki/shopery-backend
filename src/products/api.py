@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from src.products.dto import (BrandItem, BrandList, BrandWrite, CategoryItem,
                               CategoryList, CategoryWrite, NewTag,
                               ProductDetail, ProductList, ProductWrite,
-                              TagItem, TagsList)
+                              TagItem, TagsList, FileUploadResponse)
 from src.products.service import ProductService
 
 router = APIRouter(tags=["product management"])
@@ -247,7 +247,7 @@ async def delete_tag(guid: uuid.UUID, service: ProductService = Depends()):
 async def post_product_image(file: UploadFile, service: ProductService = Depends()):
     result = service.upload_product_image(file.file)
     if result.success:
-        return Response(status_code=status.HTTP_201_CREATED)
+        return FileUploadResponse(file_url=result.uploaded_file_path)
     else:
         return Response(status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
 
@@ -258,6 +258,6 @@ async def post_product_image(file: UploadFile, service: ProductService = Depends
 async def post_brand_logo(file: UploadFile, service: ProductService = Depends()):
     result = service.upload_brand_logo(file.file)
     if result.success:
-        return Response(status_code=status.HTTP_201_CREATED)
+        return FileUploadResponse(file_url=result.uploaded_file_path)
     else:
         return Response(status_code=status.HTTP_503_SERVICE_UNAVAILABLE)

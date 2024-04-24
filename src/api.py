@@ -1,6 +1,6 @@
 from src.common.config import Config
 from src.common.fastapi_utils import DependencyInjector, RouterBuilder
-from src.common.s3 import S3Gateway, get_local_s3_gateway
+from src.common.s3 import ObjectStorageGateway, get_local_s3_gateway
 from src.common.sql import SQLDatabase
 from src.products.api import router as products_router
 
@@ -13,7 +13,7 @@ dependency_injector = DependencyInjector(
 
 if config.enable_local_aws_emulation:
     dependency_injector = dependency_injector.with_dependency(
-        S3Gateway, get_local_s3_gateway
+        ObjectStorageGateway, get_local_s3_gateway
     )
 
 app = dependency_injector.build_app()
