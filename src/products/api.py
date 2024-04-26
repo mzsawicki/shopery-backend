@@ -252,6 +252,7 @@ async def delete_tag(guid: uuid.UUID, service: ProductService = Depends()):
     }
 )
 async def post_product_image(file: UploadFile, service: ProductService = Depends()):
+    assert file.filename
     result = service.upload_product_image(file.filename, file.file)
     if result.success:
         return FileUploadResponse(file_url=result.uploaded_file_path)
@@ -283,6 +284,7 @@ async def post_product_image(file: UploadFile, service: ProductService = Depends
     }
 )
 async def post_brand_logo(file: UploadFile, service: ProductService = Depends()):
+    assert file.filename
     result = service.upload_product_image(file.filename, file.file)
     if result.success:
         return FileUploadResponse(file_url=result.uploaded_file_path)
