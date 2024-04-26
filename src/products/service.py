@@ -1,3 +1,4 @@
+import logging
 import math
 import typing
 import uuid
@@ -8,6 +9,7 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import joinedload
 
+from src.common.config import Config
 from src.common.s3 import ObjectStorageGateway, UploadResult
 from src.common.sql import SQLDatabase
 from src.common.time import LocalTimeProvider, TimeProvider
@@ -62,6 +64,7 @@ class ProductService:
         self._session_factory = session_factory
         self._s3_gateway = s3_gateway
         self._time_provider = time_provider
+        self._config = Config()
 
     async def add_product(self, dto: ProductWrite) -> ProductWriteResult:
         created_at = self._time_provider.now()
@@ -462,12 +465,22 @@ class ProductService:
             await session.commit()
         return Result(success=True)
 
-    def upload_product_image(self, file: typing.BinaryIO) -> UploadResult:
-        file_key = str(uuid.uuid4())
+    def upload_product_image(self, name: str, file: typing.BinaryIO) -> UploadResult:
+        file_extension = _get_file_extension(name)
+        if not _is_file_extension_valid(file_extension):
+            return UploadResult(success=False, file_format_valid=False)
+        if not _is_file_size_valid(file, self._config.max_upload_file_size_bytes):
+            return UploadResult(success=False, file_size_ok=False)
+        file_key = f"{str(uuid.uuid4())}.{file_extension}"
         return self._s3_gateway.upload_file("product-images", file_key, file)
 
-    def upload_brand_logo(self, file: typing.BinaryIO) -> UploadResult:
-        file_key = str(uuid.uuid4())
+    def upload_brand_logo(self, name: str, file: typing.BinaryIO) -> UploadResult:
+        file_extension = _get_file_extension(name)
+        if not _is_file_extension_valid(file_extension):
+            return UploadResult(success=False, file_format_valid=False)
+        if not _is_file_size_valid(file, self._config.max_upload_file_size_bytes):
+            return UploadResult(success=False, file_size_ok=False)
+        file_key = f"{str(uuid.uuid4())}.{file_extension}"
         return self._s3_gateway.upload_file("brand-logos", file_key, file)
 
 
@@ -551,3 +564,22 @@ async def _does_tag_already_exist(en: str, pl: str, session: AsyncSession) -> bo
     )
     result = await session.execute(stmt)
     return result.scalar_one()
+
+
+def _get_file_extension(filename: str) -> str:
+    return filename.split(".")[-1]
+
+
+def _is_file_extension_valid(extension: str) -> bool:
+    return extension.lower() in ["jpg", "jpeg", "png"]
+
+
+def _is_file_size_valid(file: typing.BinaryIO, max_file_size_bytes: int) -> bool:
+    total_size = 0
+    for chunk in file:
+        total_size += len(chunk)
+        if total_size > max_file_size_bytes:
+            return False
+    file.seek(0)
+    return True
+

@@ -33,3 +33,6 @@ class Config(BaseSettings):
     aws_access_key_id: str = Field()
     aws_secret_access_key: str = Field()
     s3_region: str = Field()
+
+    # File upload
+    max_upload_file_size_bytes: int = Field()

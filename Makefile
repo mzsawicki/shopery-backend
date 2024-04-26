@@ -10,6 +10,8 @@ down:
 	docker compose down --remove-orphans
 log:
 	docker compose logs
+ps:
+	docker compose ps
 test:
 	docker compose -f docker-compose.test.yml run tests poetry run pytest
 bootstrap-local:

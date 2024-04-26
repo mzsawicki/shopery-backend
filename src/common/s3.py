@@ -12,6 +12,8 @@ from src.common.config import Config
 @dataclass(frozen=True, init=True)
 class UploadResult:
     success: bool
+    file_format_valid: bool = True
+    file_size_ok: bool = True
     uploaded_file_path: typing.Optional[str] = None
 
 

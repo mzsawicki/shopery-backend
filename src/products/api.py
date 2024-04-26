@@ -242,22 +242,62 @@ async def delete_tag(guid: uuid.UUID, service: ProductService = Depends()):
 
 
 @router.post(
-    "/product-images", status_code=status.HTTP_201_CREATED, name="Upload product image"
+    "/product-images",
+    status_code=status.HTTP_201_CREATED,
+    name="Upload product image",
+    responses={
+        400: {"detail": "Invalid file extension"},
+        413: {"detail": "Image too large"},
+        503: {"detail": "Upload service not available"}
+    }
 )
 async def post_product_image(file: UploadFile, service: ProductService = Depends()):
-    result = service.upload_product_image(file.file)
+    result = service.upload_product_image(file.filename, file.file)
     if result.success:
         return FileUploadResponse(file_url=result.uploaded_file_path)
+    elif not result.file_size_ok:
+        return JSONResponse(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            content={"detail": "Image too large"}
+        )
+    elif not result.file_format_valid:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"detail": "Invalid file extension"}
+        )
     else:
-        return Response(status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"detail": "Upload service not available"}
+        )
 
 
 @router.post(
-    "/brand-logos", status_code=status.HTTP_201_CREATED, name="Upload brand logo"
+    "/brand-logos",
+    status_code=status.HTTP_201_CREATED,
+    name="Upload brand logo",
+    responses={
+        400: {"detail": "Invalid file extension"},
+        413: {"detail": "Image too large"},
+        503: {"detail": "Upload service not available"}
+    }
 )
 async def post_brand_logo(file: UploadFile, service: ProductService = Depends()):
-    result = service.upload_brand_logo(file.file)
+    result = service.upload_product_image(file.filename, file.file)
     if result.success:
         return FileUploadResponse(file_url=result.uploaded_file_path)
+    elif not result.file_size_ok:
+        return JSONResponse(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            content={"detail": "Image too large"}
+        )
+    elif not result.file_format_valid:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"detail": "Invalid file extension"}
+        )
     else:
-        return Response(status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"detail": "Upload service not available"}
+        )
