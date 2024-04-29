@@ -248,8 +248,8 @@ async def delete_tag(guid: uuid.UUID, service: ProductService = Depends()):
     responses={
         400: {"detail": "Invalid file extension"},
         413: {"detail": "Image too large"},
-        503: {"detail": "Upload service not available"}
-    }
+        503: {"detail": "Upload service not available"},
+    },
 )
 async def post_product_image(file: UploadFile, service: ProductService = Depends()):
     assert file.filename
@@ -259,17 +259,17 @@ async def post_product_image(file: UploadFile, service: ProductService = Depends
     elif not result.file_size_ok:
         return JSONResponse(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            content={"detail": "Image too large"}
+            content={"detail": "Image too large"},
         )
     elif not result.file_format_valid:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
-            content={"detail": "Invalid file extension"}
+            content={"detail": "Invalid file extension"},
         )
     else:
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content={"detail": "Upload service not available"}
+            content={"detail": "Upload service not available"},
         )
 
 
@@ -280,8 +280,8 @@ async def post_product_image(file: UploadFile, service: ProductService = Depends
     responses={
         400: {"detail": "Invalid file extension"},
         413: {"detail": "Image too large"},
-        503: {"detail": "Upload service not available"}
-    }
+        503: {"detail": "Upload service not available"},
+    },
 )
 async def post_brand_logo(file: UploadFile, service: ProductService = Depends()):
     assert file.filename
@@ -291,15 +291,15 @@ async def post_brand_logo(file: UploadFile, service: ProductService = Depends())
     elif not result.file_size_ok:
         return JSONResponse(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            content={"detail": "Image too large"}
+            content={"detail": "Image too large"},
         )
     elif not result.file_format_valid:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
-            content={"detail": "Invalid file extension"}
+            content={"detail": "Invalid file extension"},
         )
     else:
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content={"detail": "Upload service not available"}
+            content={"detail": "Upload service not available"},
         )

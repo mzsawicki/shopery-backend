@@ -6,14 +6,15 @@ if __name__ == "__main__":
     for bucket in s3_buckets:
         s3.create_bucket(bucket)
         bucket_policy = {
-            'Version': '2012-10-17',
-            'Statement': [{
-                'Sid': 'AddPerm',
-                'Effect': 'Allow',
-                'Principal': '*',
-                'Action': ['s3:GetObject'],
-                'Resource': f'arn:aws:s3:::{bucket}/*'
-            }]
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Sid": "AddPerm",
+                    "Effect": "Allow",
+                    "Principal": "*",
+                    "Action": ["s3:GetObject"],
+                    "Resource": f"arn:aws:s3:::{bucket}/*",
+                }
+            ],
         }
         s3.set_bucket_policy(bucket, bucket_policy)
-

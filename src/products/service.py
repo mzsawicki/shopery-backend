@@ -582,4 +582,3 @@ def _is_file_size_valid(file: typing.BinaryIO, max_file_size_bytes: int) -> bool
             return False
     file.seek(0)
     return True
-
