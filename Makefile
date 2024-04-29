@@ -14,6 +14,5 @@ ps:
 	docker compose ps
 test:
 	docker compose -f docker-compose.test.yml run tests poetry run pytest
-bootstrap-local:
-	awslocal s3api create-bucket --bucket product-images
-	awslocal s3api create-bucket --bucket brand-logos
+bootstrap:
+	docker compose run api poetry run python -m src.bootstrap

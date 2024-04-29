@@ -2,6 +2,7 @@ import abc
 import logging
 import typing
 from dataclasses import dataclass
+import json
 
 import boto3
 from botocore.exceptions import ClientError
@@ -42,6 +43,12 @@ class S3Gateway(ObjectStorageGateway):
         except ClientError as error:
             logging.error(error)
             return UploadResult(success=False)
+
+    def create_bucket(self, bucket: str) -> None:
+        self._client.create_bucket(Bucket=bucket)
+
+    def set_bucket_policy(self, bucket: str, policy: typing.Dict[str, typing.Any]) -> None:
+        self._client.put_bucket_policy(Bucket=bucket, Policy=json.dumps(policy))
 
 
 def get_local_s3_gateway() -> S3Gateway:
