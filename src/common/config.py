@@ -36,3 +36,6 @@ class Config(BaseSettings):
 
     # File upload
     max_upload_file_size_bytes: int = Field()
+
+    # CORS
+    cors_origins: str = Field()
