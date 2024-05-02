@@ -26,6 +26,21 @@ class ObjectStorageGateway(metaclass=abc.ABCMeta):
         pass
 
 
+def bucket_policy_read_public(bucket: str) -> typing.Dict[str, typing.Any]:
+    return {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Sid": "AddPerm",
+                "Effect": "Allow",
+                "Principal": "*",
+                "Action": ["s3:GetObject"],
+                "Resource": f"arn:aws:s3:::{bucket}/*",
+            }
+        ],
+    }
+
+
 class S3Gateway(ObjectStorageGateway):
     def __init__(self, **kwargs):
         self._emulated_url = kwargs.pop("emulated_url", kwargs.get("endpoint_url"))
@@ -51,6 +66,10 @@ class S3Gateway(ObjectStorageGateway):
         self, bucket: str, policy: typing.Dict[str, typing.Any]
     ) -> None:
         self._client.put_bucket_policy(Bucket=bucket, Policy=json.dumps(policy))
+
+    def does_bucket_exist(self, bucket: str) -> bool:
+        response = self._client.head_bucket(Bucket=bucket)
+        return response["ResponseMetadata"]["HTTPStatusCode"] == 200
 
 
 def get_local_s3_gateway() -> S3Gateway:
