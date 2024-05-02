@@ -25,6 +25,20 @@ class ObjectStorageGateway(metaclass=abc.ABCMeta):
     ) -> UploadResult:
         pass
 
+    @abc.abstractmethod
+    def create_bucket(self, bucket: str) -> None:
+        pass
+
+    @abc.abstractmethod
+    def set_bucket_policy(
+        self, bucket: str, policy: typing.Dict[str, typing.Any]
+    ) -> None:
+        pass
+
+    @abc.abstractmethod
+    def does_bucket_exist(self, bucket: str) -> bool:
+        pass
+
 
 def bucket_policy_read_public(bucket: str) -> typing.Dict[str, typing.Any]:
     return {
