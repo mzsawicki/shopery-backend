@@ -15,5 +15,3 @@ services:
       dockerfile: Dockerfile
     env_file:
       - config.test.env
-    volumes:
-      - ./:/application
