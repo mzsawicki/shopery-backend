@@ -1,4 +1,5 @@
 import datetime
+import enum
 import typing
 import uuid
 
@@ -12,9 +13,21 @@ from src.common.model import Entity
 SCHEMA = "store"
 
 
+class InboxEventType(enum.Enum):
+    PRODUCT_UPDATED = "PRODUCT_UPDATED"
+    PRODUCT_REMOVED = "PRODUCT_REMOVED"
+    CATEGORY_UPDATED = "CATEGORY_UPDATED"
+    CATEGORY_REMOVED = "CATEGORY_REMOVED"
+    TAG_REMOVED = "TAG_REMOVED"
+
+
 class InboxEvent(Entity):
     guid: Mapped[uuid.UUID] = mapped_column(
         postgresql.UUID(as_uuid=True), primary_key=True
+    )
+    event_type: Mapped[InboxEventType] = mapped_column(
+        postgresql.ENUM(InboxEventType),
+        nullable=False,
     )
     data: Mapped[typing.Dict[str, typing.Any]] = mapped_column(
         postgresql.JSONB, nullable=False
@@ -24,6 +37,17 @@ class InboxEvent(Entity):
 
     __tablename__ = "inbox_events"
     __table_args__ = {"schema": SCHEMA}
+
+    def __init__(
+        self,
+        data: typing.Dict[str, typing.Any],
+        event_type: InboxEventType,
+        created_at: datetime.datetime,
+    ) -> None:
+        self.guid: uuid.UUID = uuid.uuid4()
+        self.data: typing.Dict[str, typing.Any] = data
+        self.event_type: InboxEventType = event_type
+        self.created_at: datetime.datetime = created_at
 
 
 product = (
