@@ -1,4 +1,5 @@
-from src.common.s3 import get_local_s3_gateway, bucket_policy_read_public, ObjectStorageGateway
+from src.common.s3 import (ObjectStorageGateway, bucket_policy_read_public,
+                           get_local_s3_gateway)
 
 S3_BUCKETS = "product-images", "brand-logos"
 

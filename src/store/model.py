@@ -2,7 +2,7 @@ import datetime
 import typing
 import uuid
 
-from redis.commands.search.field import TextField, NumericField, TagField
+from redis.commands.search.field import NumericField, TagField, TextField
 from sqlalchemy import DateTime
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import Mapped, mapped_column
@@ -47,6 +47,5 @@ product = (
     TagField("$.category_en", as_name="category_en"),
     TagField("$.category_pl", as_name="category_pl"),
     TagField("$.brand_name", as_name="brand_name"),
-    TextField("$.brand_logo_url", as_name="brand_logo_url", no_index=True)
+    TextField("$.brand_logo_url", as_name="brand_logo_url", no_index=True),
 )
-
