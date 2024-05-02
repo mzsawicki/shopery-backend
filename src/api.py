@@ -1,10 +1,10 @@
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.common.config import Config
+from src.common.cors import parse_origins
 from src.common.fastapi_utils import DependencyInjector, RouterBuilder
 from src.common.s3 import ObjectStorageGateway, get_local_s3_gateway
 from src.common.sql import SQLDatabase
-from src.common.cors import parse_origins
 from src.products.api import router as products_router
 
 config = Config()
@@ -28,5 +28,5 @@ app.add_middleware(
     allow_origins=parse_origins(config.cors_origins),
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )

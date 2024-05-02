@@ -8,6 +8,7 @@ from src.common.model import Entity
 from src.common.sql import (connection_string_from_config,
                             construct_connection_string)
 from src.products.model import Brand, Category, Product, Tag
+from src.store.model import InboxEvent
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
