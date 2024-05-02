@@ -1,6 +1,6 @@
 import asyncio
 
-from redis import Redis
+from redis import Redis, ResponseError
 from redis.commands.search.indexDefinition import IndexDefinition, IndexType
 
 from src.common.config import Config
@@ -22,17 +22,15 @@ def bootstrap_s3_buckets(s3: ObjectStorageGateway = get_local_s3_gateway()) -> N
 def bootstrap_redis_indexes(config: Config = Config()) -> None:
     client = Redis(host=config.redis_database_host, port=config.redis_database_port)
     rs = client.ft("idx:products")
-    info = rs.info()
-    if not info:
+    try:
+        rs.info()
+    except ResponseError:
         rs.create_index(
             product_schema,
-            definition=IndexDefinition(
-                prefix=["product:"], index_type=IndexType.JSON
-            )
+            definition=IndexDefinition(prefix=["product:"], index_type=IndexType.JSON),
         )
 
 
 if __name__ == "__main__":
     bootstrap_s3_buckets()
     bootstrap_redis_indexes()
-

@@ -33,8 +33,12 @@ product = (
     TextField("$.name_pl", as_name="name_pl"),
     TextField("$.description_en", as_name="description_en"),
     TextField("$.description_pl", as_name="description_pl"),
-    NumericField("$.price_usd", as_name="discounted_price_usd", sortable=True, no_index=True),
-    NumericField("$.price_pln", as_name="discounted_price_pln", sortable=True, no_index=True),
+    NumericField(
+        "$.price_usd", as_name="discounted_price_usd", sortable=True, no_index=True
+    ),
+    NumericField(
+        "$.price_pln", as_name="discounted_price_pln", sortable=True, no_index=True
+    ),
     TagField("$.tags_en", as_name="tags_en", separator=","),
     TagField("$.tags_pl", as_name="tags_pl", separator=","),
     TagField("$.category_en", as_name="category_en"),
