@@ -17,6 +17,8 @@ from src.products.dto import (BrandItem, BrandList, BrandWrite, CategoryItem,
                               ProductDetail, ProductList, ProductListItem,
                               ProductWrite, TagItem, TagsList)
 from src.products.model import Brand, Category, Product, Tag
+from src.store.dto import ProductUpdate
+from src.store.service import StoreService
 
 
 @dataclass(init=True, frozen=True)
@@ -56,10 +58,12 @@ class TagWriteResult:
 class ProductService:
     def __init__(
         self,
+        store_service: StoreService = Depends(),
         session_factory: async_sessionmaker = Depends(SQLDatabase),
         s3_gateway: ObjectStorageGateway = Depends(ObjectStorageGateway),
         time_provider: TimeProvider = Depends(LocalTimeProvider),
     ):
+        self._store_service = store_service
         self._session_factory = session_factory
         self._s3_gateway = s3_gateway
         self._time_provider = time_provider
@@ -75,21 +79,25 @@ class ProductService:
                 return ProductWriteResult(
                     success=False, info="Product of such sku or name already exists"
                 )
+
             tags = await _get_tags_by_guids(dto.tags_guids, session)
             if len(tags) < len(dto.tags_guids):
                 return ProductWriteResult(
                     success=False, info="Not all requested tags were found"
                 )
+
             category = await _get_category_or_none_by_guid(dto.category_guid, session)
             if not category:
                 return ProductWriteResult(
                     success=False, info=f"Category {dto.category_guid} not found"
                 )
+
             brand = await _get_brand_or_none_by_guid(dto.brand_guid, session)
             if not brand:
                 return ProductWriteResult(
                     success=False, info=f"Brand {dto.brand_guid} not found"
                 )
+
             product = Product(
                 **dto.model_dump(exclude={"tags_guids", "category_guid", "brand_guid"}),
                 tags=tags,
@@ -98,6 +106,9 @@ class ProductService:
                 created_at=created_at,
             )
             session.add(product)
+
+            await self._post_product_update_to_store_inbox(product, session)
+
             await session.commit()
         return ProductWriteResult(
             product=ProductDetail.model_validate(product), success=True
@@ -157,6 +168,9 @@ class ProductService:
             product.brand = brand
             product.updated_at = updated_at
             session.add(product)
+
+            await self._post_product_update_to_store_inbox(product, session)
+
             await session.commit()
         return ProductWriteResult(
             success=True, product=ProductDetail.model_validate(product)
@@ -481,6 +495,42 @@ class ProductService:
             return UploadResult(success=False, file_size_ok=False)
         file_key = f"{str(uuid.uuid4())}.{file_extension}"
         return self._s3_gateway.upload_file("brand-logos", file_key, file)
+
+    async def _post_product_update_to_store_inbox(
+        self, product: Product, session: AsyncSession
+    ) -> None:
+        dto = ProductUpdate(
+            guid=str(product.guid),
+            sku=product.sku,
+            name_en=product.name_en,
+            name_pl=product.name_pl,
+            image_url=product.image_url,
+            description_en=product.description_en,
+            description_pl=product.description_pl,
+            base_price_usd=str(product.base_price_usd),
+            base_price_pln=str(product.base_price_pln),
+            discounted_price_usd=str(
+                product.base_price_usd - product.base_price_usd * product.discount
+                if product.discount
+                else product.base_price_usd
+            ),
+            discounted_price_pln=str(
+                product.base_price_pln - product.base_price_pln * product.discount
+                if product.discount
+                else product.base_price_pln
+            ),
+            quantity=product.quantity,
+            weight=product.weight,
+            color_en=product.color_en,
+            color_pl=product.color_pl,
+            tags_en=[tag.en for tag in product.tags],
+            tags_pl=[tag.pl for tag in product.tags],
+            category_en=product.category.name_en,
+            category_pl=product.category.name_pl,
+            brand_name=product.brand.name,
+            brand_logo_url=product.brand.logo_url,
+        )
+        await self._store_service.post_product_update_to_inbox(dto, session)
 
 
 async def _get_tags_by_guids(

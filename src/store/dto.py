@@ -13,10 +13,10 @@ class ProductUpdate(BaseModel):
     image_url: typing.Optional[str]
     description_en: str
     description_pl: str
-    base_price_usd: Decimal
-    base_price_pln: Decimal
-    discounted_price_usd: Decimal
-    discounted_price_pln: Decimal
+    base_price_usd: str
+    base_price_pln: str
+    discounted_price_usd: str
+    discounted_price_pln: str
     quantity: PositiveInt
     weight: PositiveInt
     color_en: str
@@ -27,4 +27,3 @@ class ProductUpdate(BaseModel):
     category_pl: str
     brand_name: str
     brand_logo_url: str
-    updated_at: datetime.datetime

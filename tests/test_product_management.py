@@ -15,6 +15,7 @@ from src.common.sql import (connection_string_from_config,
 from src.common.time import LocalTimeProvider
 from src.products.dto import BrandWrite, CategoryWrite, NewTag, ProductWrite
 from src.products.service import ProductService
+from src.store.service import StoreService
 
 
 def migrate(connection: AsyncConnection, alembic_config: alembic.config.Config) -> None:
@@ -51,7 +52,12 @@ async def database() -> typing.AsyncGenerator[async_sessionmaker, None]:
 
 @pytest.fixture(scope="function")
 async def service(database) -> ProductService:
-    return ProductService(database, get_local_s3_gateway(), LocalTimeProvider())
+    return ProductService(
+        StoreService(LocalTimeProvider()),
+        database,
+        get_local_s3_gateway(),
+        LocalTimeProvider(),
+    )
 
 
 def tag_green() -> NewTag:
