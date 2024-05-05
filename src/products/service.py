@@ -10,7 +10,7 @@ from sqlalchemy.orm import joinedload
 
 from src.common.config import Config
 from src.common.s3 import ObjectStorageGateway, UploadResult
-from src.common.sql import SQLDatabase
+from src.common.sql import get_db
 from src.common.time import LocalTimeProvider, TimeProvider
 from src.products.dto import (BrandItem, BrandList, BrandWrite, CategoryItem,
                               CategoryList, CategoryWrite, NewTag,
@@ -59,7 +59,7 @@ class ProductService:
     def __init__(
         self,
         store_service: StoreService = Depends(),
-        session_factory: async_sessionmaker = Depends(SQLDatabase),
+        session_factory: async_sessionmaker = Depends(get_db),
         s3_gateway: ObjectStorageGateway = Depends(ObjectStorageGateway),
         time_provider: TimeProvider = Depends(LocalTimeProvider),
     ):

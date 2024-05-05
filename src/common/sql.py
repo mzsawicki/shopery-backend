@@ -51,12 +51,8 @@ async def dispose_engine(engine: AsyncEngine) -> None:
     await engine.dispose()
 
 
-class SQLDatabase:
-    def __init__(self):
-        config = Config()
-        dsn = connection_string_from_config(config)
-        engine = create_database_engine(dsn)
-        self._session_factory = get_session_factory(engine)
+_engine = create_database_engine(connection_string_from_config(Config()))
 
-    def __call__(self) -> async_sessionmaker:
-        return self._session_factory
+
+def get_db() -> async_sessionmaker:
+    return get_session_factory(_engine)
