@@ -165,3 +165,4 @@ config.env
 
 volume/
 rabbitmq/
+redis-volume/

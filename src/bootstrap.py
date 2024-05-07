@@ -29,6 +29,7 @@ def bootstrap_redis_indexes(config: Config = Config()) -> None:
             product_schema,
             definition=IndexDefinition(prefix=["product:"], index_type=IndexType.JSON),
         )
+    client.save()
 
 
 if __name__ == "__main__":

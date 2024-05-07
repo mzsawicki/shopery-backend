@@ -107,9 +107,11 @@ class ProductService:
             )
             session.add(product)
 
-            await self._post_product_update_to_store_inbox(product, session)
+            event_guid = await self._post_product_update_to_store_inbox(product, session)
 
             await session.commit()
+
+            await self._store_service.schedule_product_update(event_guid)
         return ProductWriteResult(
             product=ProductDetail.model_validate(product), success=True
         )
@@ -169,9 +171,11 @@ class ProductService:
             product.updated_at = updated_at
             session.add(product)
 
-            await self._post_product_update_to_store_inbox(product, session)
+            event_guid = await self._post_product_update_to_store_inbox(product, session)
 
             await session.commit()
+
+            await self._store_service.schedule_product_update(event_guid)
         return ProductWriteResult(
             success=True, product=ProductDetail.model_validate(product)
         )
@@ -498,7 +502,7 @@ class ProductService:
 
     async def _post_product_update_to_store_inbox(
         self, product: Product, session: AsyncSession
-    ) -> None:
+    ) -> uuid.UUID:
         dto = ProductUpdate(
             guid=str(product.guid),
             sku=product.sku,
@@ -530,7 +534,7 @@ class ProductService:
             brand_name=product.brand.name,
             brand_logo_url=product.brand.logo_url,
         )
-        await self._store_service.post_product_update_to_inbox(dto, session)
+        return await self._store_service.post_product_update_to_inbox(dto, session)
 
 
 async def _get_tags_by_guids(

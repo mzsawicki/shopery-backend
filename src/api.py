@@ -1,9 +1,11 @@
 from fastapi.middleware.cors import CORSMiddleware
+import taskiq_fastapi
 
 from src.common.config import Config
 from src.common.cors import parse_origins
 from src.common.fastapi_utils import DependencyInjector, RouterBuilder
 from src.common.s3 import ObjectStorageGateway, get_local_s3_gateway
+from src.common.tasks import broker
 from src.products.api import router as products_router
 
 config = Config()
@@ -28,3 +30,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.on_event("startup")
+async def app_startup():
+    if not broker.is_worker_process:
+        await broker.startup()
+
+
+@app.on_event("shutdown")
+async def app_shutdown():
+    if not broker.is_worker_process:
+        await broker.shutdown()
+
+
+taskiq_fastapi.init(broker, "src.api:app")

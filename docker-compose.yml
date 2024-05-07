@@ -13,9 +13,9 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data
+      - ./redis-volume:/data
   rabbitmq:
-    image: rabbitmq
+    image: rabbitmq:3-management-alpine
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -24,6 +24,11 @@ services:
     volumes:
         - ./rabbitmq/data/:/var/lib/rabbitmq/
         - ./rabbitmq/log/:/var/log/rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 5s
+      retries: 3
   minio:
     image: minio/minio
     ports:
@@ -46,6 +51,21 @@ services:
     volumes:
       - ./:/application
       - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: poetry run taskiq worker src.common.tasks:broker --fs-discover
+    env_file:
+      - config.env
+    volumes:
+      - ./:/worker
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
   nginx:
     image: nginx:latest
     ports:
