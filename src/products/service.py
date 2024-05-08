@@ -107,7 +107,9 @@ class ProductService:
             )
             session.add(product)
 
-            event_guid = await self._post_product_update_to_store_inbox(product, session)
+            event_guid = await self._post_product_update_to_store_inbox(
+                product, session
+            )
 
             await session.commit()
 
@@ -171,7 +173,9 @@ class ProductService:
             product.updated_at = updated_at
             session.add(product)
 
-            event_guid = await self._post_product_update_to_store_inbox(product, session)
+            event_guid = await self._post_product_update_to_store_inbox(
+                product, session
+            )
 
             await session.commit()
 

@@ -10,7 +10,7 @@ from taskiq import TaskiqDepends
 from src.common.redis import get_redis_client
 from src.common.sql import get_db
 from src.common.tasks import broker
-from src.common.time import TimeProvider, LocalTimeProvider
+from src.common.time import LocalTimeProvider, TimeProvider
 from src.store.model import InboxEvent
 
 
@@ -30,9 +30,13 @@ async def consume_product_updated_event(
         result = await session.execute(stmt)
         event = result.scalar_one_or_none()
         if not event:
-            logging.error(f"Could not find event {event.guid}. Was it already processed?")
+            logging.error(
+                f"Could not find event {event.guid}. Was it already processed?"
+            )
         else:
             product_guid = event.data["guid"]
-            await redis_client.json().set(f"product:{product_guid}", Path.root_path(), event.data)
+            await redis_client.json().set(
+                f"product:{product_guid}", Path.root_path(), event.data
+            )
             event.processed_at = time_provider.now()
             await session.commit()

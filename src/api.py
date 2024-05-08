@@ -1,5 +1,5 @@
-from fastapi.middleware.cors import CORSMiddleware
 import taskiq_fastapi
+from fastapi.middleware.cors import CORSMiddleware
 
 from src.common.config import Config
 from src.common.cors import parse_origins
