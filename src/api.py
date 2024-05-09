@@ -7,6 +7,7 @@ from src.common.fastapi_utils import DependencyInjector, RouterBuilder
 from src.common.s3 import ObjectStorageGateway, get_local_s3_gateway
 from src.common.tasks import broker
 from src.products.api import router as products_router
+from src.store.api import router as store_router
 
 config = Config()
 
@@ -21,7 +22,12 @@ if config.enable_local_aws_emulation:
 
 app = dependency_injector.build_app()
 
-app.include_router(RouterBuilder().with_router(products_router).build())
+app.include_router(
+    RouterBuilder()
+    .with_router(products_router)
+    .with_router(store_router)
+    .build()
+)
 
 app.add_middleware(
     CORSMiddleware,

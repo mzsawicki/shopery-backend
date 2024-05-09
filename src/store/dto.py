@@ -25,3 +25,19 @@ class ProductUpdate(BaseModel):
     category_pl: str
     brand_name: str
     brand_logo_url: str
+
+
+class ProductListItem(BaseModel):
+    guid: str
+    name_en: str
+    name_pl: str
+    image_url: typing.Optional[str]
+    base_price_usd: str
+    base_price_pln: str
+
+
+class ProductListPage(BaseModel):
+    page_number: int
+    pages_count: int
+    all_results_count: int
+    items: typing.List[ProductListItem]
