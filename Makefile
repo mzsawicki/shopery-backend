@@ -13,6 +13,6 @@ log:
 ps:
 	docker compose ps
 test:
-	docker compose -f docker-compose.test.yml run tests poetry run pytest
+	docker compose -f docker-compose.test.yml build tests && docker compose -f docker-compose.test.yml run tests poetry run pytest
 bootstrap:
 	docker compose run api poetry run python -m src.bootstrap

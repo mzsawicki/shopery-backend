@@ -8,6 +8,7 @@ class Config(BaseSettings):
     # Development
     enable_local_aws_emulation: bool
     emulated_s3_url: str = Field()
+    enable_in_memory_task_broker: bool = Field()
 
     # Filesystem
     base_dir: Path = Path(__file__).parent.parent.parent

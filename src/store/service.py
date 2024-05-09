@@ -40,4 +40,4 @@ class StoreService:
 
     @staticmethod
     async def schedule_product_removal(removal_event_guid: uuid.UUID) -> None:
-        await consume_product_removed_event(removal_event_guid)
+        await consume_product_removed_event.kiq(removal_event_guid)
