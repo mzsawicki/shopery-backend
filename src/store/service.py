@@ -27,7 +27,7 @@ class StoreService:
         self, product_guid: uuid.UUID, session: AsyncSession
     ) -> uuid.UUID:
         event = InboxEvent(
-            {"guid": product_guid},
+            {"guid": str(product_guid)},
             InboxEventType.PRODUCT_REMOVED,
             self._time_provider.now(),
         )
