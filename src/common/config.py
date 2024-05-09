@@ -41,7 +41,7 @@ class Config(BaseSettings):
     cors_origins: str = Field()
 
     # RabbitMQ
-    rabbitmq_username: str = Field()
-    rabbitmq_password: str = Field()
+    rabbitmq_default_user: str = Field()
+    rabbitmq_default_pass: str = Field()
     rabbitmq_host: str = Field()
     rabbitmq_port: int = Field()

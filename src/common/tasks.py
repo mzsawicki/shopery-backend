@@ -7,7 +7,7 @@ from src.common.config import Config
 config = Config()
 
 broker = AioPikaBroker(
-    f"amqp://{config.rabbitmq_username}:{config.rabbitmq_password}"
+    f"amqp://{config.rabbitmq_default_user}:{config.rabbitmq_default_pass}"
     f"@{config.rabbitmq_host}/"
 )
 
