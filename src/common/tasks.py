@@ -6,6 +6,9 @@ from src.common.config import Config
 
 config = Config()
 
-broker = AioPikaBroker(f"amqp://guest:guest" f"@{config.rabbitmq_host}/")
+broker = AioPikaBroker(
+    f"amqp://{config.rabbitmq_username}:{config.rabbitmq_password}"
+    f"@{config.rabbitmq_host}/"
+)
 
 scheduler = TaskiqScheduler(broker=broker, sources=[LabelScheduleSource(broker)])
