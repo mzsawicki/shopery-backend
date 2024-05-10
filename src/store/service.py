@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from src.common.redis import get_redis_client
 from src.common.sql import get_db
 from src.common.time import LocalTimeProvider, TimeProvider
-from src.store.dto import ProductListItem, ProductListPage, ProductUpdate
+from src.store.dto import Product, ProductListPage
 from src.store.model import InboxEvent, InboxEventType
 from src.store.tasks import (consume_product_removed_event,
                              consume_product_updated_event)
@@ -31,7 +31,7 @@ class StoreService:
         query = Query("*").paging(page_number * page_size, page_size)
         result = await self._redis_client.ft("idx:products").search(query)
         all_results_count = result.total
-        items = [ProductListItem.model_validate_json(doc.json) for doc in result.docs]
+        items = [Product.model_validate_json(doc.json) for doc in result.docs]
         return ProductListPage(
             page_number=page_number,
             pages_count=math.ceil(all_results_count / page_size),
@@ -40,7 +40,7 @@ class StoreService:
         )
 
     async def post_product_update_to_inbox(
-        self, dto: ProductUpdate, session: AsyncSession
+        self, dto: Product, session: AsyncSession
     ) -> uuid.UUID:
         event = InboxEvent(
             dto.model_dump(), InboxEventType.PRODUCT_UPDATED, self._time_provider.now()

@@ -17,7 +17,7 @@ from src.products.dto import (BrandItem, BrandList, BrandWrite, CategoryItem,
                               ProductDetail, ProductList, ProductListItem,
                               ProductWrite, TagItem, TagsList)
 from src.products.model import Brand, Category, Product, Tag
-from src.store.dto import ProductUpdate
+from src.store.dto import Product as StoreProduct
 from src.store.service import StoreService
 
 
@@ -513,7 +513,7 @@ class ProductService:
     async def _post_product_update_to_store_inbox(
         self, product: Product, session: AsyncSession
     ) -> uuid.UUID:
-        dto = ProductUpdate(
+        dto = StoreProduct(
             guid=str(product.guid),
             sku=product.sku,
             name_en=product.name_en,

@@ -3,7 +3,7 @@ import typing
 from pydantic import BaseModel, PositiveInt
 
 
-class ProductUpdate(BaseModel):
+class Product(BaseModel):
     guid: str
     sku: str
     name_en: str
@@ -27,19 +27,8 @@ class ProductUpdate(BaseModel):
     brand_logo_url: str
 
 
-class ProductListItem(BaseModel):
-    guid: str
-    name_en: str
-    name_pl: str
-    image_url: typing.Optional[str]
-    base_price_usd: str
-    base_price_pln: str
-    discounted_price_usd: str
-    discounted_price_pln: str
-
-
 class ProductListPage(BaseModel):
     page_number: int
     pages_count: int
     all_results_count: int
-    items: typing.List[ProductListItem]
+    items: typing.List[Product]
