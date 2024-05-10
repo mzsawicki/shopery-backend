@@ -22,7 +22,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
-          script: "cd shopery-backend && make down && make build"
+          script: "cd shopery-backend && make build"
     - name: Lint
       uses: appleboy/ssh-action@v1.0.3
       with:
