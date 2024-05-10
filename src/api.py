@@ -23,10 +23,7 @@ if config.enable_local_aws_emulation:
 app = dependency_injector.build_app()
 
 app.include_router(
-    RouterBuilder()
-    .with_router(products_router)
-    .with_router(store_router)
-    .build()
+    RouterBuilder().with_router(products_router).with_router(store_router).build()
 )
 
 app.add_middleware(

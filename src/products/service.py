@@ -248,7 +248,9 @@ class ProductService:
             product.removed_at = removed_at
             session.add(product)
 
-            event_guid = await self._store_service.post_product_removal_to_inbox(product.guid, session)
+            event_guid = await self._store_service.post_product_removal_to_inbox(
+                product.guid, session
+            )
             await session.commit()
 
             await self._store_service.schedule_product_removal(event_guid)

@@ -34,6 +34,8 @@ class ProductListItem(BaseModel):
     image_url: typing.Optional[str]
     base_price_usd: str
     base_price_pln: str
+    discounted_price_usd: str
+    discounted_price_pln: str
 
 
 class ProductListPage(BaseModel):

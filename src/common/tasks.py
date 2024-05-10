@@ -1,7 +1,6 @@
-from taskiq import TaskiqScheduler
+from taskiq import InMemoryBroker, TaskiqScheduler
 from taskiq.schedule_sources import LabelScheduleSource
 from taskiq_aio_pika import AioPikaBroker
-from taskiq import InMemoryBroker
 
 from src.common.config import Config
 
